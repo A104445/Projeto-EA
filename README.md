@@ -1,2 +1,2 @@
 # Projeto-EA
-App para utentes/utilizadores de mios de transporte localizada (uma cidade)
+App para utentes/utilizadores de meios de transporte localizada (uma cidade)
