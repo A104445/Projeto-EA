@@ -1,7 +1,7 @@
 {
   "name": "airbus",
   "version": "0.0.1",
-  "description": "Projeto EA",
+  "description": "A Quasar Project",
   "productName": "AirBus",
   "author": "JoaoCunha50 <joaomanuelmachadodacunha@gmail.com>",
   "type": "module",
@@ -24,8 +24,8 @@
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.0.3",
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
     "eslint-plugin-vue": "^10.8.0",
     "globals": "^17.4.0",
     "vue-tsc": "^3.2.6",
@@ -43,7 +43,6 @@
   "engines": {
     "node": "^28 || ^26 || ^24 || ^22.12",
     "npm": ">= 6.13.4",
-    "yarn": ">= 1.21.1",
-    "pnpm": ">= 10.0.0"
+    "yarn": ">= 1.21.1"
   }
 }
