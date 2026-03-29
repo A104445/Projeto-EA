@@ -1,3 +1,5 @@
+/*é onde fica a lógica do negócio */
+
 package com.projeto_EA.AirBus.services;
 
 import com.projeto_EA.AirBus.base.BaseService;

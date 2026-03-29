@@ -1,0 +1,1 @@
+/*São objetos para transportar dados entre backend e API*/

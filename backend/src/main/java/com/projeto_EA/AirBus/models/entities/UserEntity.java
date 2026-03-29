@@ -1,0 +1,1 @@
+/*são as classes que representam as tabelas da base de dados. */

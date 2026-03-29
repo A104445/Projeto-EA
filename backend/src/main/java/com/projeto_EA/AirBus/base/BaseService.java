@@ -1,3 +1,5 @@
+/*contém código comum para outras classes usarem */
+
 package com.projeto_EA.AirBus.base;
 
 import org.springframework.data.jpa.repository.JpaRepository;
