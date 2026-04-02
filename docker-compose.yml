@@ -27,6 +27,7 @@ services:
       DB_USER: postgres
       DB_PASS: postgres
       JPA_DDL_AUTO: update
+      JWT_SECRET: ${JWT_SECRET}
     volumes:
       - ./backend/src:/backend/src
     depends_on:

@@ -1,33 +1,36 @@
-/*é onde fica a lógica do negócio */
-
 package com.projeto_EA.AirBus.services;
 
 import com.projeto_EA.AirBus.base.BaseService;
-import com.projeto_EA.AirBus.models.dtos.UserDTO;
+import com.projeto_EA.AirBus.models.DTOs.UserDTO;
+import com.projeto_EA.AirBus.models.DTOs.UserUpdateDTO;
 import com.projeto_EA.AirBus.models.entities.UserEntity;
-import com.projeto_EA.AirBus.models.repositories.UserRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.projeto_EA.AirBus.repositories.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class UserService extends BaseService<UserEntity, Long> {
 
-    @Autowired private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository) {
         super(userRepository);
+        this.userRepository = userRepository;
     }
 
-    public UserDTO findById(Long id) {
-        return userRepository.findById(id).map(UserDTO::new).orElse(null);
+    public UserDTO getProfile(Long userID) {
+        return userRepository.findById(userID)
+                .map(UserDTO::new)
+                .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado!"));
     }
 
-    public UserDTO save(UserDTO userDTO) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setName(userDTO.getName());
-        userEntity.setEmail(userDTO.getEmail());
-        userEntity.setPassword(userDTO.getPassword());
-        return new UserDTO(userRepository.save(userEntity));
+    public UserDTO updateProfile(Long userID, UserUpdateDTO dto) {
+        UserEntity user = userRepository.findById(userID)
+                .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado!"));
+        if (dto.getNome() != null)           user.setNome(dto.getNome());
+        if (dto.getDataNascimento() != null) user.setDataNascimento(dto.getDataNascimento());
+        if (dto.getTelefone() != null)       user.setTelefone(dto.getTelefone());
+        return new UserDTO(userRepository.save(user));
     }
 }
