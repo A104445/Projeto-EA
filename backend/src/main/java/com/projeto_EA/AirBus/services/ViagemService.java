@@ -48,21 +48,7 @@ public class ViagemService {
             throw new IllegalStateException("Título inválido ou expirado!");
         }
 
-        // Validar zona da paragem de entrada.
-        boolean zonaValid = paragem.getZonas().stream()
-                .anyMatch(z -> titulo.getZonas().contains(z));
-
-        // Bilhete individual: validar carreira, a zona já está coberta.
-        if (titulo instanceof BilheteIndividualEntity bilhete) {
-            if (!bilhete.getCarreira().getID().equals(carreira.getID())) {
-                throw new IllegalStateException("Bilhete não é válido para esta carreira!");
-            }
-            zonaValid = true;
-        }
-
-        if (!zonaValid) {
-            throw new IllegalStateException("Título não cobre a zona desta paragem!");
-        }
+        titulo.validarParaCheckIn(carreira,paragem);
 
         ViagemEntity viagem = new ViagemEntity();
         viagem.setUtente(user);
@@ -97,25 +83,14 @@ public class ViagemService {
         Set<ZonaGeograficaEntity> zonasPercorridas = calcularZonasPercorridas(
                 viagem.getCarreira(), viagem.getOrigem(), destino);
 
-        boolean irregular = false;
-        if (!(viagem.getTitulo() instanceof BilheteIndividualEntity)) {
-            irregular = !viagem.getTitulo().getZonas().containsAll(zonasPercorridas);
-        }
-
+        TituloTransporteEntity titulo = viagem.getTitulo();
         viagem.setDestino(destino);
         viagem.setDataHoraSaida(LocalDateTime.now());
         viagem.setEstado(ViagemEntity.CONCLUIDA);
-        viagem.setIrregular(irregular);
+        viagem.setIrregular(titulo.isIrregular(zonasPercorridas));
 
-        if (viagem.getTitulo() instanceof PacoteViagensEntity pacote) {
-            pacote.descontarViagem();
-            tituloRepository.save(pacote);
-        }
-
-        if (viagem.getTitulo() instanceof BilheteIndividualEntity bilhete) {
-            bilhete.marcarUsado();
-            tituloRepository.save(bilhete);
-        }
+        titulo.aoFinalizarViagem();
+        tituloRepository.save(titulo);
 
         if (viagem.getCarreira().getVeiculo() != null) {
             viagem.getCarreira().getVeiculo().decrementarOcupacao();

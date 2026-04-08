@@ -40,6 +40,24 @@ public abstract class TituloTransporteEntity {
 
     public abstract boolean isValid();
 
+
+    public void validarParaCheckIn(CarreiraEntity carreira, ParagemEntity paragem) {
+        boolean zonaValid = paragem.getZonas().stream().anyMatch(z -> this.zonas.contains(z));
+        if (!zonaValid) {
+            throw new IllegalStateException("Título não cobre a zona desta paragem!");
+        }
+    }
+
+
+    public boolean isIrregular(Set<ZonaGeograficaEntity> zonasPercorridas) {
+        return !this.zonas.containsAll(zonasPercorridas);
+    }
+
+
+    public void aoFinalizarViagem() {
+        // no-op por defeito
+    }
+
     public String getTipo() {
         DiscriminatorValue dv = this.getClass().getAnnotation(DiscriminatorValue.class);
         return dv != null ? dv.value() : "DESCONHECIDO";

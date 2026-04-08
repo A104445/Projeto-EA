@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @DiscriminatorValue("BILHETE_INDIVIDUAL")
@@ -25,6 +26,24 @@ public class BilheteIndividualEntity extends TituloTransporteEntity {
     @Override
     public boolean isValid() {
         return !usado && (dataFim == null || !LocalDate.now().isAfter(dataFim));
+    }
+
+    @Override
+    public void validarParaCheckIn(CarreiraEntity carreira, ParagemEntity paragem) {
+        if (!this.carreira.getID().equals(carreira.getID())) {
+            throw new IllegalStateException("Bilhete não é válido para esta carreira!");
+        }
+        // zona já está coberta pela carreira — não é necessário verificar
+    }
+
+    @Override
+    public boolean isIrregular(Set<ZonaGeograficaEntity> zonasPercorridas) {
+        return false; // bilhete individual cobre a carreira inteira
+    }
+
+    @Override
+    public void aoFinalizarViagem() {
+        marcarUsado();
     }
 
     public void marcarUsado() {

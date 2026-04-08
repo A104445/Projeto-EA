@@ -10,15 +10,20 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor
 public class PacoteViagensEntity extends TituloTransporteEntity {
 
-    @Column(name = "num_viagens_totais", nullable = false)
+    @Column(name = "num_viagens_totais")
     private int numViagensTotais;
 
-    @Column(name = "saldo_restante", nullable = false)
+    @Column(name = "saldo_restante")
     private int saldoRestante;
 
     @Override
     public boolean isValid() {
         return saldoRestante > 0;
+    }
+
+    @Override
+    public void aoFinalizarViagem() {
+        descontarViagem();
     }
 
     public void descontarViagem() {

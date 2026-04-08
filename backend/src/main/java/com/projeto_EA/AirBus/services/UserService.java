@@ -12,25 +12,22 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserService extends BaseService<UserEntity, Long> {
 
-    private final UserRepository userRepository;
-
     public UserService(UserRepository userRepository) {
         super(userRepository);
-        this.userRepository = userRepository;
     }
 
     public UserDTO getProfile(Long userID) {
-        return userRepository.findById(userID)
+        return repository.findById(userID)
                 .map(UserDTO::new)
                 .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado!"));
     }
 
     public UserDTO updateProfile(Long userID, UserUpdateDTO dto) {
-        UserEntity user = userRepository.findById(userID)
+        UserEntity user = repository.findById(userID)
                 .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado!"));
         if (dto.getNome() != null)           user.setNome(dto.getNome());
         if (dto.getDataNascimento() != null) user.setDataNascimento(dto.getDataNascimento());
         if (dto.getTelefone() != null)       user.setTelefone(dto.getTelefone());
-        return new UserDTO(userRepository.save(user));
+        return new UserDTO(repository.save(user));
     }
 }

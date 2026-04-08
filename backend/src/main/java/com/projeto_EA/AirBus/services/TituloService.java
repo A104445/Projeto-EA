@@ -21,14 +21,16 @@ public class TituloService {
     private final CarreiraRepository carreiraRepository;
     private final ZonaGeograficaRepository zonaRepository;
 
+    @Transactional(readOnly = true)
     public List<TituloDTO> getMeusTitulos(Long userID) {
         return tituloRepository.findByUtenteID(userID).stream()
                 .map(TituloDTO::new)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<TituloDTO> getMeusTitulosAtivos(Long userID) {
-        return tituloRepository.findActivosByUtenteID(userID).stream()
+        return tituloRepository.findByUtenteIDAndEstado(userID, "ATIVO").stream()
                 .map(TituloDTO::new)
                 .collect(Collectors.toList());
     }
