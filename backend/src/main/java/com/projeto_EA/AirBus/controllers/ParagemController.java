@@ -22,12 +22,9 @@ public class ParagemController {
         return ResponseEntity.ok(paragemService.getAllParagens());
     }
 
-    @GetMapping("/nearby")
-    public ResponseEntity<List<ParagemDTO>> getProximas(
-            @RequestParam double lat,
-            @RequestParam double lng,
-            @RequestParam(defaultValue = "5") int limit) {
-        return ResponseEntity.ok(paragemService.getProximas(lat, lng, limit));
+    @GetMapping("/by-qr")
+    public ResponseEntity<ParagemDTO> getByQr(@RequestParam String qr) {
+        return ResponseEntity.ok(paragemService.getByQr(qr));
     }
 
     @GetMapping("/{id}/routes")

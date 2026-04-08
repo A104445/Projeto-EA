@@ -39,21 +39,21 @@ public class DataSeeder implements CommandLineRunner {
 
         // === PARAGENS ===
         // Carreira 1: Estação → UMinho (Zona A → B)
-        ParagemEntity estacaoBraga = criarParagem("Estação de Braga", 41.5432, -8.4249, List.of(zonaA));
-        ParagemEntity avCentral    = criarParagem("Avenida Central", 41.5505, -8.4287, List.of(zonaA));
-        ParagemEntity pracaRepublica = criarParagem("Praça da República", 41.5494, -8.4313, List.of(zonaA));
-        ParagemEntity laranjais    = criarParagem("Laranjais", 41.5540, -8.4100, List.of(zonaA, zonaB));
-        ParagemEntity uminho       = criarParagem("Universidade do Minho", 41.5601, -8.3962, List.of(zonaB));
+        ParagemEntity estacaoBraga   = criarParagem("Estação de Braga",       "QR-ESTACAO-BRAGA",    List.of(zonaA));
+        ParagemEntity avCentral      = criarParagem("Avenida Central",         "QR-AV-CENTRAL",       List.of(zonaA));
+        ParagemEntity pracaRepublica = criarParagem("Praça da República",      "QR-PRACA-REPUBLICA",  List.of(zonaA));
+        ParagemEntity laranjais      = criarParagem("Laranjais",               "QR-LARANJAIS",        List.of(zonaA, zonaB));
+        ParagemEntity uminho         = criarParagem("Universidade do Minho",   "QR-UMINHO",           List.of(zonaB));
 
         // Carreira 2: Centro → Guimarães (Zona A → C)
-        ParagemEntity terminal     = criarParagem("Terminal de Braga", 41.5478, -8.4260, List.of(zonaA));
-        ParagemEntity braga        = criarParagem("Braga (Rotunda)", 41.5352, -8.4180, List.of(zonaA, zonaB));
-        ParagemEntity fafe         = criarParagem("Fafe", 41.4510, -8.1746, List.of(zonaC));
-        ParagemEntity guimaraes    = criarParagem("Guimarães Centro", 41.4428, -8.2957, List.of(zonaC));
+        ParagemEntity terminal       = criarParagem("Terminal de Braga",       "QR-TERMINAL-BRAGA",   List.of(zonaA));
+        ParagemEntity braga          = criarParagem("Braga (Rotunda)",         "QR-BRAGA-ROTUNDA",    List.of(zonaA, zonaB));
+        ParagemEntity fafe           = criarParagem("Fafe",                    "QR-FAFE",             List.of(zonaC));
+        ParagemEntity guimaraes      = criarParagem("Guimarães Centro",        "QR-GUIMARAES",        List.of(zonaC));
 
-        // Carreira 3: Loop Centro Braga (Zona A)
-        ParagemEntity bomJesus     = criarParagem("Bom Jesus", 41.5528, -8.3782, List.of(zonaB));
-        ParagemEntity seBraga      = criarParagem("Sé de Braga", 41.5502, -8.4270, List.of(zonaA));
+        // Carreira 3: Loop Centro Braga (Zona A/B)
+        ParagemEntity bomJesus       = criarParagem("Bom Jesus",               "QR-BOM-JESUS",        List.of(zonaB));
+        ParagemEntity seBraga        = criarParagem("Sé de Braga",             "QR-SE-BRAGA",         List.of(zonaA));
 
         // === VEÍCULOS ===
         VeiculoEntity v1 = veiculoRepo.save(new VeiculoEntity("BR-01-AA", 50));
@@ -114,9 +114,9 @@ public class DataSeeder implements CommandLineRunner {
                 zonaRepo.count(), paragemRepo.count(), carreiraRepo.count());
     }
 
-    private ParagemEntity criarParagem(String nome, double lat, double lng,
+    private ParagemEntity criarParagem(String nome, String qr,
                                         List<ZonaGeograficaEntity> zonas) {
-        ParagemEntity p = new ParagemEntity(nome, lat, lng);
+        ParagemEntity p = new ParagemEntity(nome, qr);
         p.getZonas().addAll(zonas);
         return paragemRepo.save(p);
     }

@@ -13,17 +13,14 @@ public class ParagemDTO {
     private Long ID;
     private String nome;
     private String estado;
-    private double latitude;
-    private double longitude;
+    private String qr;
     private Set<String> zonas;
-    private Double distanciaKm;
 
     public ParagemDTO(ParagemEntity p) {
         this.ID = p.getID();
         this.nome = p.getNome();
         this.estado = p.getEstado();
-        this.latitude = p.getLatitude();
-        this.longitude = p.getLongitude();
+        this.qr = p.getQr();
         this.zonas = p.getZonas().stream()
                 .map(z -> z.getNome())
                 .collect(Collectors.toSet());

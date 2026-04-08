@@ -25,11 +25,8 @@ public class ParagemEntity {
     @Column(nullable = false)
     private String estado = "ATIVO";
 
-    @Column(nullable = false)
-    private double latitude;
-
-    @Column(nullable = false)
-    private double longitude;
+    @Column(nullable = false, unique = true)
+    private String qr;
 
     @ManyToMany
     @JoinTable(
@@ -42,9 +39,8 @@ public class ParagemEntity {
     @ManyToMany(mappedBy = "paragens")
     private List<CarreiraEntity> carreiras = new ArrayList<>();
 
-    public ParagemEntity(String nome, double latitude, double longitude) {
+    public ParagemEntity(String nome, String qr) {
         this.nome = nome;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.qr = qr;
     }
 }
