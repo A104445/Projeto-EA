@@ -182,7 +182,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from 'stores/auth';
 import { api } from 'boot/axios';
 import QrScanner from 'components/QRScanner.vue';
-import type { TituloDTO, ViagemDTO, ParagemDTO } from 'src/types/api';
+import type { TituloDTO, ViagemDTO, ParagemDTO } from 'components/models';
 
 const authStore = useAuthStore();
 

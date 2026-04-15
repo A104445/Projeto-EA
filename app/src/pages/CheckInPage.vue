@@ -147,7 +147,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { api } from 'boot/axios';
 import QrScanner from 'components/QRScanner.vue';
-import type { ParagemDTO, CarreiraDTO, TituloDTO, ViagemDTO } from 'src/types/api';
+import type { ParagemDTO, CarreiraDTO, TituloDTO, ViagemDTO } from 'components/models';
 
 const step = ref<1 | 2 | 3>(1);
 

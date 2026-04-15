@@ -278,7 +278,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
 import { api } from 'boot/axios';
-import type { TituloDTO, ZonaDTO, CarreiraDTO } from 'src/types/api';
+import type { TituloDTO, ZonaDTO, CarreiraDTO } from 'components/models';
 
 const titulos = ref<TituloDTO[]>([]);
 const titulosLoading = ref(true);
