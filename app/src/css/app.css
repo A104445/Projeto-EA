@@ -1,1 +1,66 @@
 /* app global css */
+
+:root {
+  --et-blue: #5B8FF9;
+  --et-blue-dark: #3d6fd9;
+  --et-dark: #2D2D3A;
+  --et-navy: #1E3A6E;
+  --et-text: #1a1a2e;
+  --et-subtext: #6b7280;
+  --et-border: #e5e7eb;
+  --et-bg: #f9fafb;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #ffffff;
+  color: var(--et-text);
+}
+
+/* mobile-first: center the app like a phone */
+#q-app {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.et-input .q-field__control {
+  border-radius: 8px;
+}
+
+.et-btn-primary {
+  background: var(--et-blue) !important;
+  color: white !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  letter-spacing: 0.5px;
+}
+
+.et-btn-outline {
+  background: transparent !important;
+  color: white !important;
+  border: 2px solid white !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+}
+
+.et-divider-text {
+  color: var(--et-subtext);
+  font-size: 13px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.et-divider-text::before,
+.et-divider-text::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--et-border);
+}

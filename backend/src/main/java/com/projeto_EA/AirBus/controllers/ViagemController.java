@@ -32,6 +32,13 @@ public class ViagemController {
         return ResponseEntity.ok(viagemService.checkOut(user.getID(), id, dto));
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<ViagemDTO> getViagemAtiva(@AuthenticationPrincipal UserEntity user) {
+        return viagemService.getViagemAtiva(user.getID())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
     @GetMapping("/history")
     public ResponseEntity<List<ViagemDTO>> getHistorico(@AuthenticationPrincipal UserEntity user) {
         return ResponseEntity.ok(viagemService.getHistorico(user.getID()));

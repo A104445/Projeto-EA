@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -98,6 +99,11 @@ public class ViagemService {
         }
 
         return new ViagemDTO(viagemRepository.save(viagem));
+    }
+
+    public Optional<ViagemDTO> getViagemAtiva(Long userID) {
+        return viagemRepository.findByUtenteIDAndEstado(userID, ViagemEntity.EM_CURSO)
+                .map(ViagemDTO::new);
     }
 
     public List<ViagemDTO> getHistorico(Long userID) {

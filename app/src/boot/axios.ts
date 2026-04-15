@@ -18,6 +18,19 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
 });
 
+// auto-logout on expired/invalid token
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('et_token');
+      localStorage.removeItem('et_user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+  },
+);
+
 export default defineBoot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 

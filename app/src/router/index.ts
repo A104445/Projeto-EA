@@ -33,5 +33,16 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
+  Router.beforeEach((to) => {
+    const token = localStorage.getItem('et_token');
+    if (to.meta.requiresAuth && !token) {
+      return { path: '/login' };
+    }
+    // redirect already-authenticated users away from auth pages
+    if ((to.path === '/login' || to.path === '/register') && token) {
+      return { path: '/app' };
+    }
+  });
+
   return Router;
 });
