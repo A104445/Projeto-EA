@@ -6,7 +6,7 @@ export const ZONE_COLORS: Record<string, string> = {
   E: '#ec4899',
 };
 
-/** devolve a cor hex para o nome de uma zona (ex: "Zona A" → #3b82f6) */
+/** devolve a cor para o nome de uma zona (ex: "Zona A" → #3b82f6) */
 export function zonaColor(nome: string): string {
   const m = nome.match(/Zona\s+([A-Z])/i);
   return m?.[1] ? (ZONE_COLORS[m[1].toUpperCase()] ?? '#6b7280') : '#6b7280';

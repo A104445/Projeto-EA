@@ -1,9 +1,7 @@
 <template>
   <q-page class="pagamentos-page">
 
-    <div class="page-header">
-      <h1 class="page-title">Bilhetes</h1>
-    </div>
+    <PageHeader title="Bilhetes" />
 
     <div class="page-content">
       <div class="section-label">Os meus títulos ativos</div>
@@ -96,24 +94,14 @@
         <q-card-section class="sheet-body">
           <p class="sheet-desc">Válido por 12 meses. Seleciona as zonas geográficas que queres cobrir:</p>
           <div class="field-label q-mb-xs">ZONAS</div>
-          <div v-if="zonasLoading" class="text-grey-5 text-caption">A carregar zonas...</div>
-          <q-banner v-else-if="zonasError" rounded dense class="bg-orange-1 text-orange-9 q-mb-sm">
-            {{ zonasError }}
-            <template #action>
-              <q-btn flat dense label="Tentar novamente" @click="loadZonas" />
-            </template>
-          </q-banner>
-          <div v-else class="zonas-chips">
-            <button
-              v-for="z in zonas" :key="z.ID"
-              class="zona-chip"
-              :class="{ 'zona-chip-selected': passeForm.zonaIDs.includes(z.ID) }"
-              :style="passeForm.zonaIDs.includes(z.ID)
-                ? { background: zonaColor(z.nome), borderColor: zonaColor(z.nome) }
-                : { borderColor: zonaColor(z.nome), color: zonaColor(z.nome) }"
-              @click="toggleZona(passeForm.zonaIDs, z.ID)"
-            >{{ zonaBadgeLabel(z.nome) }}</button>
-          </div>
+          <ZonaPicker
+            :zonas="zonas"
+            :selected-ids="passeForm.zonaIDs"
+            :loading="zonasLoading"
+            :error="zonasError"
+            @toggle="(id) => toggleZona(passeForm.zonaIDs, id)"
+            @retry="loadZonas"
+          />
           <q-banner v-if="errors.passe" rounded dense class="bg-red-1 text-red-8 q-mt-sm">
             {{ errors.passe }}
           </q-banner>
@@ -199,24 +187,14 @@
             <q-btn flat round icon="add" @click="pacoteForm.numViagens++" />
           </div>
           <div class="field-label q-mt-md q-mb-xs">ZONAS</div>
-          <div v-if="zonasLoading" class="text-grey-5 text-caption">A carregar zonas...</div>
-          <q-banner v-else-if="zonasError" rounded dense class="bg-orange-1 text-orange-9 q-mb-sm">
-            {{ zonasError }}
-            <template #action>
-              <q-btn flat dense label="Tentar novamente" @click="loadZonas" />
-            </template>
-          </q-banner>
-          <div v-else class="zonas-chips">
-            <button
-              v-for="z in zonas" :key="z.ID"
-              class="zona-chip"
-              :class="{ 'zona-chip-selected': pacoteForm.zonaIDs.includes(z.ID) }"
-              :style="pacoteForm.zonaIDs.includes(z.ID)
-                ? { background: zonaColor(z.nome), borderColor: zonaColor(z.nome) }
-                : { borderColor: zonaColor(z.nome), color: zonaColor(z.nome) }"
-              @click="toggleZona(pacoteForm.zonaIDs, z.ID)"
-            >{{ zonaBadgeLabel(z.nome) }}</button>
-          </div>
+          <ZonaPicker
+            :zonas="zonas"
+            :selected-ids="pacoteForm.zonaIDs"
+            :loading="zonasLoading"
+            :error="zonasError"
+            @toggle="(id) => toggleZona(pacoteForm.zonaIDs, id)"
+            @retry="loadZonas"
+          />
           <q-banner v-if="errors.pacote" rounded dense class="bg-red-1 text-red-8 q-mt-sm">
             {{ errors.pacote }}
           </q-banner>
@@ -230,28 +208,24 @@
     </q-dialog>
 
     <!-- success dialog -->
-    <q-dialog v-model="successDialog" position="bottom">
-      <q-card class="bottom-sheet">
-        <q-card-section class="text-center q-pt-lg q-pb-sm">
-          <q-icon name="check_circle" size="56px" color="green-6" />
-          <p class="text-h6 q-mt-md q-mb-xs">Compra concluída!</p>
-          <p class="text-grey-6 text-caption">O teu título foi adicionado à conta.</p>
-        </q-card-section>
-        <q-card-actions class="sheet-actions">
-          <q-btn unelevated class="et-btn-primary full-width" label="OK" style="height:48px"
-                 @click="successDialog = false" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <ResultDialog
+      v-model="successDialog"
+      icon="check_circle"
+      icon-color="green-6"
+      title="Compra concluída!"
+      message="O teu título foi adicionado à conta."
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
+import PageHeader from 'components/PageHeader.vue';
 import ZoneBadge from 'components/ZoneBadge.vue';
+import ResultDialog from 'components/ResultDialog.vue';
+import ZonaPicker from 'components/ZonaPicker.vue';
 import type { TituloDTO, ZonaDTO, CarreiraDTO } from 'components/models';
 import { formatDate } from 'src/utils/formatters';
-import { zonaColor, zonaBadgeLabel } from 'src/utils/zones';
 import { tipoIcon, tipoColor } from 'src/utils/titulo';
 import { titlesService } from 'src/services/titlesService';
 import { zonesService } from 'src/services/zonesService';
@@ -396,13 +370,6 @@ function toggleZona(list: number[], id: number) {
 .compra-desc { font-size: 12px; color: var(--et-subtext); }
 
 /* dialog internals */
-.zonas-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.zona-chip {
-  padding: 8px 18px; border-radius: 24px; border: 2px solid;
-  background: transparent; font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: background 0.15s, color 0.15s; outline: none;
-}
-.zona-chip-selected { color: white !important; }
 .carreiras-list {
   border: 1px solid var(--et-border); border-radius: 10px;
   overflow-y: auto; max-height: 260px;

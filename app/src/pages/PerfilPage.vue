@@ -1,8 +1,6 @@
 <template>
   <q-page class="perfil-page">
-    <div class="page-header">
-      <h1 class="page-title">Perfil</h1>
-    </div>
+    <PageHeader title="Perfil" />
 
     <div class="page-content">
       <!-- avatar + nome -->
@@ -103,6 +101,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from 'stores/auth';
+import PageHeader from 'components/PageHeader.vue';
 import ZoneBadge from 'components/ZoneBadge.vue';
 import type { TituloDTO } from 'components/models';
 import { formatDate } from 'src/utils/formatters';

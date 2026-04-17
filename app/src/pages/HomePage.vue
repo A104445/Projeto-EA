@@ -149,26 +149,13 @@
     </q-dialog>
 
     <!-- check-out (dialog result) -->
-    <q-dialog v-model="resultDialog" position="bottom">
-      <q-card class="bottom-sheet">
-        <q-card-section class="text-center q-pt-lg q-pb-sm">
-          <q-icon :name="resultIrregular ? 'warning' : 'check_circle'"
-                  size="56px" :color="resultIrregular ? 'orange-7' : 'green-6'" />
-          <p class="text-h6 q-mt-md q-mb-xs">
-            {{ resultIrregular ? 'Viagem irregular!' : 'Viagem concluída!' }}
-          </p>
-          <p class="text-grey-6 text-caption">
-            {{ resultIrregular
-              ? 'O título não cobre todas as zonas percorridas.'
-              : 'Check-out realizado com sucesso!' }}
-          </p>
-        </q-card-section>
-        <q-card-actions class="sheet-actions">
-          <q-btn unelevated class="et-btn-primary full-width" label="OK" style="height:48px"
-                 @click="resultDialog = false" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <ResultDialog
+      v-model="resultDialog"
+      :icon="resultIrregular ? 'warning' : 'check_circle'"
+      :icon-color="resultIrregular ? 'orange-7' : 'green-6'"
+      :title="resultIrregular ? 'Viagem irregular!' : 'Viagem concluída!'"
+      :message="resultIrregular ? 'O título não cobre todas as zonas percorridas.' : 'Check-out realizado com sucesso!'"
+    />
   </q-page>
 </template>
 
@@ -177,6 +164,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from 'stores/auth';
 import QrScanner from 'components/QRScanner.vue';
 import ZoneBadge from 'components/ZoneBadge.vue';
+import ResultDialog from 'components/ResultDialog.vue';
 import type { TituloDTO, ViagemDTO, ParagemDTO } from 'components/models';
 import { formatDate, formatDateTime } from 'src/utils/formatters';
 import { tripIconFromNome } from 'src/utils/titulo';

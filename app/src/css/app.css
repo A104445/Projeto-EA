@@ -88,6 +88,13 @@ body {
   gap: 12px;
 }
 
+/* ── constrain bottom dialogs to app width ── */
+.q-dialog__inner--bottom {
+  left: max(0px, calc(50vw - 215px)) !important;
+  right: auto !important;
+  width: min(430px, 100vw) !important;
+}
+
 /* ── shared bottom-sheet (dialogs) ── */
 .bottom-sheet {
   border-radius: 20px 20px 0 0 !important;

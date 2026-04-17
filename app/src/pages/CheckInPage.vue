@@ -1,9 +1,6 @@
 <template>
   <q-page class="checkin-page">
-    <div class="page-header page-header--back">
-      <q-btn flat round icon="arrow_back" color="white" @click="$router.back()" />
-      <h1 class="page-title">Fazer Check-in</h1>
-    </div>
+    <PageHeader title="Fazer Check-in" :show-back="true" />
 
     <div class="page-content">
       <!-- PASSO 1: scan QR da paragem -->
@@ -116,6 +113,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import PageHeader from 'components/PageHeader.vue';
 import QrScanner from 'components/QRScanner.vue';
 import ZoneBadge from 'components/ZoneBadge.vue';
 import type { ParagemDTO, CarreiraDTO, TituloDTO, ViagemDTO } from 'components/models';

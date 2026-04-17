@@ -1,8 +1,6 @@
 <template>
   <q-page class="percursos-page">
-    <div class="page-header">
-      <h1 class="page-title">Histórico de Viagens</h1>
-    </div>
+    <PageHeader title="Histórico de Viagens" />
 
     <!-- filtros -->
     <div class="filters-row">
@@ -56,6 +54,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import PageHeader from 'components/PageHeader.vue';
 import type { ViagemDTO } from 'components/models';
 import { formatDateTime, duration } from 'src/utils/formatters';
 import { tripIconFromNome } from 'src/utils/titulo';
