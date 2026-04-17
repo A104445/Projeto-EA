@@ -26,7 +26,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', component: () => import('pages/HomePage.vue') },
       {
-        path: 'pagamentos',
+        path: 'bilhetes',
         component: () => import('pages/PaymentsPage.vue'),
       },
       {
@@ -35,13 +35,11 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'percursos',
-        component: () => import('pages/PlaceholderPage.vue'),
-        props: { icon: 'map', title: 'Percursos' },
+        component: () => import('pages/PercursosPage.vue'),
       },
       {
         path: 'perfil',
-        component: () => import('pages/PlaceholderPage.vue'),
-        props: { icon: 'person', title: 'Perfil' },
+        component: () => import('pages/PerfilPage.vue'),
       },
     ],
   },

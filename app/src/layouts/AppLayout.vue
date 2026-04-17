@@ -15,10 +15,10 @@
       >
         <q-tab name="home" icon="home" label="Início" @click="$router.push('/app')" />
         <q-tab
-          name="pagamentos"
-          icon="shopping_cart"
-          label="Pagamentos"
-          @click="$router.push('/app/pagamentos')"
+          name="bilhetes"
+          icon="confirmation_number"
+          label="Bilhetes"
+          @click="$router.push('/app/bilhetes')"
         />
         <q-tab
           name="percursos"
@@ -40,7 +40,7 @@ const route = useRoute();
 
 const tabMap: Record<string, string> = {
   '/app': 'home',
-  '/app/pagamentos': 'pagamentos',
+  '/app/bilhetes': 'bilhetes',
   '/app/percursos': 'percursos',
   '/app/perfil': 'perfil',
 };

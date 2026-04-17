@@ -64,3 +64,64 @@ body {
   height: 1px;
   background: var(--et-border);
 }
+
+/* ── shared page layout ── */
+.page-header {
+  background: var(--et-blue);
+  padding: 52px 20px 20px;
+}
+.page-header--back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-title {
+  color: white;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+.page-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── shared bottom-sheet (dialogs) ── */
+.bottom-sheet {
+  border-radius: 20px 20px 0 0 !important;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+}
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0;
+}
+.sheet-title  { font-size: 18px; font-weight: 700; color: var(--et-text); }
+.sheet-body   { padding-top: 12px; }
+.sheet-desc   { font-size: 14px; color: var(--et-subtext); margin: 0 0 16px; }
+.sheet-actions { padding: 8px 16px 24px; display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ── shared empty state ── */
+.empty-state {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+  border: 1px dashed var(--et-border);
+}
+.empty-state p { margin: 8px 0 0; }
+
+/* ── shared field label ── */
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--et-subtext);
+  letter-spacing: 0.5px;
+}

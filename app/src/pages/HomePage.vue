@@ -21,12 +21,7 @@
         <div class="pass-card-bottom">
           <p class="pass-type">{{ activePasse.tipo?.replace(/_/g, ' ') }}</p>
           <div class="pass-zones-row">
-            <span
-              v-for="zona in activePasse.zonas"
-              :key="zona"
-              class="zone-badge"
-              :style="{ background: zonaBadgeColor(zona) }"
-            >{{ zonaBadgeLabel(zona) }}</span>
+            <ZoneBadge v-for="zona in activePasse.zonas" :key="zona" :zona="zona" />
           </div>
         </div>
       </div>
@@ -40,7 +35,7 @@
 
       <!-- ver bilhetes -->
       <q-btn unelevated class="full-width ver-bilhetes-btn" label="VER BILHETES DISPONÍVEIS"
-             @click="$router.push('/app/pagamentos')" />
+             @click="$router.push('/app/bilhetes')" />
 
       <!-- ── viagem em curso (check-out) ── -->
       <div v-if="viagemAtiva" class="viagem-ativa-card">
@@ -101,7 +96,7 @@
                 @click="$router.push('/app/percursos')">
           <q-item-section avatar>
             <div class="trip-icon-wrap">
-              <q-icon :name="tripIcon(v.carreiraNome)" size="20px" color="grey-7" />
+              <q-icon :name="tripIconFromNome(v.carreiraNome)" size="20px" color="grey-7" />
             </div>
           </q-item-section>
           <q-item-section>
@@ -125,7 +120,7 @@
 
         <q-card-section v-if="!checkoutParagem" class="sheet-body">
           <p class="sheet-desc">Aponta a câmara ao QR da paragem de destino.</p>
-          <QrScanner hint="Aponta para o QR code da paragem de saída." @scan="onCheckoutQr" />
+          <QrScanner @scan="onCheckoutQr" />
           <q-banner v-if="checkoutError" rounded dense class="bg-red-1 text-red-8 q-mt-sm">
             {{ checkoutError }}
           </q-banner>
@@ -180,9 +175,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from 'stores/auth';
-import { api } from 'boot/axios';
 import QrScanner from 'components/QRScanner.vue';
+import ZoneBadge from 'components/ZoneBadge.vue';
 import type { TituloDTO, ViagemDTO, ParagemDTO } from 'components/models';
+import { formatDate, formatDateTime } from 'src/utils/formatters';
+import { tripIconFromNome } from 'src/utils/titulo';
+import { titlesService } from 'src/services/titlesService';
+import { tripsService } from 'src/services/tripsService';
+import { stopsService } from 'src/services/stopsService';
 
 const authStore = useAuthStore();
 
@@ -201,7 +201,7 @@ const recentViagens = computed(() =>
 const checkoutDialog  = ref(false);
 const checkoutParagem = ref<ParagemDTO | null>(null);
 const checkoutLoading = ref(false);
-const checkoutError    = ref('');
+const checkoutError   = ref('');
 const resultDialog    = ref(false);
 const resultIrregular = ref(false);
 
@@ -210,34 +210,26 @@ onMounted(() => {
 });
 
 async function loadTitulos() {
-  try {
-    const { data } = await api.get<TituloDTO[]>('/api/tickets/mine/active');
-    titulos.value = data;
-  } finally { titulosLoading.value = false; }
+  try   { titulos.value = await titlesService.getActive(); }
+  finally { titulosLoading.value = false; }
 }
 
 async function loadViagens() {
-  try {
-    const { data } = await api.get<ViagemDTO[]>('/api/trips/history');
-    viagens.value = data;
-  } finally { viagensLoading.value = false; }
+  try   { viagens.value = await tripsService.getHistory(); }
+  finally { viagensLoading.value = false; }
 }
 
 async function loadViagemAtiva() {
-  try {
-    const { data } = await api.get<ViagemDTO>('/api/trips/active');
-    viagemAtiva.value = data ?? null;
-  } catch { viagemAtiva.value = null; }
+  try   { viagemAtiva.value = await tripsService.getActive(); }
+  catch { viagemAtiva.value = null; }
 }
 
 async function onCheckoutQr(code: string) {
-  if (checkoutLoading.value) return;
-  if (!code || code.length > 100) return;
-  checkoutError.value    = '';
+  if (checkoutLoading.value || !code || code.length > 100) return;
+  checkoutError.value   = '';
   checkoutLoading.value = true;
   try {
-    const { data } = await api.get<ParagemDTO>('/api/stops/by-qr', { params: { qr: code } });
-    checkoutParagem.value = data;
+    checkoutParagem.value = await stopsService.getByQr(code);
   } catch {
     checkoutError.value = `Paragem não reconhecida: "${code}!"`;
   } finally { checkoutLoading.value = false; }
@@ -245,14 +237,11 @@ async function onCheckoutQr(code: string) {
 
 async function confirmarCheckout() {
   if (!viagemAtiva.value || !checkoutParagem.value) return;
-  checkoutError.value    = '';
+  checkoutError.value   = '';
   checkoutLoading.value = true;
   try {
-    const { data } = await api.post<ViagemDTO>(
-      `/api/trips/${viagemAtiva.value.ID}/check-out`,
-      { paragemID: checkoutParagem.value.ID },
-    );
-    resultIrregular.value = data.irregular ?? false;
+    const result = await tripsService.checkOut(viagemAtiva.value.ID, checkoutParagem.value.ID);
+    resultIrregular.value = result.irregular ?? false;
     viagemAtiva.value     = null;
     checkoutDialog.value  = false;
     resultDialog.value    = true;
@@ -265,52 +254,7 @@ async function confirmarCheckout() {
 
 function resetCheckout() {
   checkoutParagem.value = null;
-  checkoutError.value    = '';
-}
-
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return '';
-  return new Date(dateStr)
-    .toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' })
-    .toUpperCase();
-}
-
-function formatDateTime(dateStr?: string): string {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  const today     = new Date();
-  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-  const time = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-  if (d.toDateString() === today.toDateString())     return `Hoje, ${time}`;
-  if (d.toDateString() === yesterday.toDateString()) return `Ontem, ${time}`;
-  return d.toLocaleDateString('pt-PT', { day: '2-digit', month: 'long' }) + ', ' + time;
-}
-
-const ZONE_COLORS: Record<string, string> = {
-  A: '#3b82f6',
-  B: '#22c55e',
-  C: '#f97316',
-  D: '#a855f7',
-  E: '#ec4899',
-};
-
-function zonaBadgeLabel(zona: string): string {
-  const match = zona.match(/Zona\s+([A-Z])/i);
-  if (match?.[1]) return `Zona ${match[1].toUpperCase()}`;
-  return zona;
-}
-
-function zonaBadgeColor(zona: string): string {
-  const match = zona.match(/Zona\s+([A-Z])/i);
-  return match?.[1] ? (ZONE_COLORS[match[1].toUpperCase()] ?? '#6b7280') : '#6b7280';
-}
-
-function tripIcon(nome: string): string {
-  const n = (nome ?? '').toLowerCase();
-  if (n.includes('metro'))  return 'subway';
-  if (n.includes('comboio') || n.includes('cp')) return 'train';
-  if (n.includes('ferry') || n.includes('barco')) return 'directions_boat';
-  return 'directions_bus';
+  checkoutError.value   = '';
 }
 </script>
 
@@ -336,23 +280,11 @@ function tripIcon(nome: string): string {
 .pass-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6); letter-spacing: 0.5px; }
 .pass-validade { text-align: right; }
 .pass-validade-label {
-  display: block;
-  font-size: 10px;
-  color: rgba(255,255,255,0.6);
-  letter-spacing: 0.5px;
+  display: block; font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 0.5px;
 }
-.pass-validade-date  {
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.9);
-}
+.pass-validade-date  { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9); }
 .pass-type      { font-size: 20px; font-weight: 700; margin: 0; }
 .pass-zones-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.zone-badge {
-  font-size: 11px; font-weight: 700; color: white;
-  padding: 3px 10px; border-radius: 20px;
-  letter-spacing: 0.3px;
-}
 
 .no-pass-card {
   background: white; border-radius: 16px; padding: 24px; text-align: center;
@@ -367,9 +299,7 @@ function tripIcon(nome: string): string {
 }
 
 /* viagem ativa */
-.viagem-ativa-card {
-  background: #16a34a; border-radius: 16px; padding: 16px; color: white;
-}
+.viagem-ativa-card { background: #16a34a; border-radius: 16px; padding: 16px; color: white; }
 .viagem-ativa-header {
   display: flex; align-items: center; gap: 8px;
   font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
@@ -401,14 +331,6 @@ function tripIcon(nome: string): string {
 }
 .trip-name { font-weight: 600; font-size: 14px; color: var(--et-text); }
 .no-trips { text-align: center; padding: 24px; color: var(--et-subtext); font-size: 14px; background: white; border-radius: 12px; }
-
-/* check-out btm */
-.bottom-sheet { border-radius: 20px 20px 0 0 !important; width: 100%; max-width: 430px; margin: 0 auto; }
-.sheet-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0; }
-.sheet-title  { font-size: 18px; font-weight: 700; color: var(--et-text); }
-.sheet-body   { padding-top: 12px; }
-.sheet-desc   { font-size: 14px; color: var(--et-subtext); margin: 0 0 16px; }
-.sheet-actions { padding: 8px 16px 24px; display: flex; gap: 8px; justify-content: flex-end; }
 
 .info-confirm {
   display: flex; align-items: center; gap: 10px;
