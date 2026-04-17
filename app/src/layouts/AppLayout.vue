@@ -26,7 +26,11 @@
           label="Percursos"
           @click="$router.push('/app/percursos')"
         />
-        <q-tab name="perfil" icon="person" label="Perfil" @click="$router.push('/app/perfil')" />
+        <q-tab
+            name="perfil"
+            icon="person"
+            label="Perfil"
+            @click="$router.push('/app/perfil')" />
       </q-tabs>
     </q-footer>
   </q-layout>

@@ -50,6 +50,9 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
+              <q-item-label v-if="c.proximaChegada" caption>
+                <q-icon name="schedule" size="11px" /> próxima: {{ c.proximaChegada }}
+              </q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-icon v-if="selectedCarreiraID === c.ID" name="check_circle" color="blue-7" />
@@ -166,8 +169,13 @@ async function onQrScanned(code: string) {
 
 async function loadCarreiras(paragemID: number) {
   carreirasLoading.value = true;
-  try   { carreiras.value = await stopsService.getRoutes(paragemID); }
-  finally { carreirasLoading.value = false; }
+  try {
+    carreiras.value = await stopsService.getRoutes(paragemID);
+    // pré-selecionar a carreira com horário mais próximo (primeira da lista)
+    if (carreiras.value.length > 0) {
+      selectedCarreiraID.value = carreiras.value[0]!.ID;
+    }
+  } finally { carreirasLoading.value = false; }
 }
 
 async function confirmarCheckIn() {

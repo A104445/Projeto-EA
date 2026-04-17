@@ -30,7 +30,17 @@ export interface CarreiraDTO {
   ID: number;
   num: string;
   nome: string;
-  paragens?: unknown[];
+  paragens?: ParagemDTO[];
+  proximaChegada?: string; // "HH:mm" — presente quando ordenado por horário
+}
+
+export interface HorarioDTO {
+  ID: number;
+  carreiraID: number;
+  paragemID: number;
+  paragemNome: string;
+  horaChegada: string; // "HH:mm:ss"
+  diaSemana: number;
 }
 
 export interface TituloDTO {

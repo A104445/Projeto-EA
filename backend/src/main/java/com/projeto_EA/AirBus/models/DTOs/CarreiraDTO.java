@@ -17,6 +17,7 @@ public class CarreiraDTO {
     private List<ParagemDTO> paragens;
     private Integer ocupacaoAtual;
     private Integer capacidade;
+    private String proximaChegada; // "HH:mm" — preenchido apenas quando ordenado por horário
 
     public CarreiraDTO(CarreiraEntity c) {
         this.ID = c.getID();

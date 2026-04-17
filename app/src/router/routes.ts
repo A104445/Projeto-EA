@@ -30,10 +30,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/PaymentsPage.vue'),
       },
       {
-        path: 'checkin',
-        component: () => import('pages/CheckInPage.vue'),
-      },
-      {
         path: 'percursos',
         component: () => import('pages/PercursosPage.vue'),
       },

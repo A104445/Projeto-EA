@@ -45,32 +45,42 @@
           <q-spinner size="16px" color="white" />
         </div>
         <div class="viagem-ativa-body">
-          <p class="viagem-ativa-carreira">
-            {{ viagemAtiva.carreiraNum }} — {{ viagemAtiva.carreiraNome }}
-          </p>
+          <p class="viagem-ativa-carreira">{{ viagemAtiva.carreiraNum }} — {{ viagemAtiva.carreiraNome }}</p>
           <p class="viagem-ativa-origem">desde {{ viagemAtiva.origemNome }}</p>
         </div>
         <q-btn unelevated class="checkout-btn full-width" label="FAZER CHECK-OUT"
                @click="checkoutDialog = true" />
       </div>
 
-      <!-- ── check-in (só aparece se não há viagem ativa) ── -->
-      <q-item v-else clickable class="checkin-item" @click="$router.push('/app/checkin')">
+      <!-- ── check-in (só sem viagem ativa) ── -->
+      <q-item v-if="!viagemAtiva" clickable class="action-item" @click="checkinDialog = true">
         <q-item-section avatar>
-          <div class="checkin-icon-wrap">
-            <q-icon name="qr_code_scanner" size="24px" color="grey-7" />
+          <div class="action-icon-wrap bg-blue-1">
+            <q-icon name="qr_code_scanner" size="22px" color="blue-7" />
           </div>
         </q-item-section>
         <q-item-section>
-          <q-item-label class="checkin-title">Fazer Check-in</q-item-label>
-          <q-item-label caption class="checkin-caption">
-            Lê o QR code da paragem para iniciar a viagem.
-          </q-item-label>
+          <q-item-label class="action-title">Fazer Check-in</q-item-label>
+          <q-item-label caption class="action-caption">Lê o QR code da paragem para iniciar a viagem.</q-item-label>
         </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" color="grey-4" />
-        </q-item-section>
+        <q-item-section side><q-icon name="chevron_right" color="grey-4" /></q-item-section>
       </q-item>
+
+      <!-- ── grid de ações (sempre visível) ── -->
+      <div class="quick-grid">
+        <button class="quick-btn" @click="openHorarios">
+          <div class="quick-btn-icon bg-orange-1">
+            <q-icon name="schedule" size="26px" color="orange-7" />
+          </div>
+          <span>Consultar horários</span>
+        </button>
+        <button class="quick-btn" @click="$router.push('/app/percursos?tab=planear')">
+          <div class="quick-btn-icon bg-green-1">
+            <q-icon name="directions" size="26px" color="green-7" />
+          </div>
+          <span>Planear viagem</span>
+        </button>
+      </div>
 
       <!-- viagens recentes -->
       <div class="section-header">
@@ -103,14 +113,15 @@
             <q-item-label class="trip-name">{{ v.carreiraNum }} - {{ v.carreiraNome }}</q-item-label>
             <q-item-label caption>{{ formatDateTime(v.dataHoraEntrada) }}</q-item-label>
           </q-item-section>
-          <q-item-section side>
-            <q-icon name="chevron_right" color="grey-4" />
-          </q-item-section>
+          <q-item-section side><q-icon name="chevron_right" color="grey-4" /></q-item-section>
         </q-item>
       </template>
     </div>
 
-    <!-- ── check-out (dialog) ── -->
+    <!-- ── check-in (sheet) ── -->
+    <CheckInSheet v-model="checkinDialog" @done="onCheckinDone" />
+
+    <!-- ── check-out (sheet) ── -->
     <q-dialog v-model="checkoutDialog" position="bottom" @hide="resetCheckout">
       <q-card class="bottom-sheet">
         <q-card-section class="sheet-header">
@@ -121,9 +132,7 @@
         <q-card-section v-if="!checkoutParagem" class="sheet-body">
           <p class="sheet-desc">Aponta a câmara ao QR da paragem de destino.</p>
           <QrScanner @scan="onCheckoutQr" />
-          <q-banner v-if="checkoutError" rounded dense class="bg-red-1 text-red-8 q-mt-sm">
-            {{ checkoutError }}
-          </q-banner>
+          <q-banner v-if="checkoutError" rounded dense class="bg-red-1 text-red-8 q-mt-sm">{{ checkoutError }}</q-banner>
           <div v-if="checkoutLoading" class="text-center q-mt-sm">
             <q-spinner color="blue-6" size="28px" />
           </div>
@@ -135,9 +144,7 @@
             <q-icon name="location_on" color="blue-7" />
             <span>{{ checkoutParagem.nome }}</span>
           </div>
-          <q-banner v-if="checkoutError" rounded dense class="bg-red-1 text-red-8 q-mt-sm q-mb-sm">
-            {{ checkoutError }}
-          </q-banner>
+          <q-banner v-if="checkoutError" rounded dense class="bg-red-1 text-red-8 q-mt-sm q-mb-sm">{{ checkoutError }}</q-banner>
         </q-card-section>
 
         <q-card-actions v-if="checkoutParagem" class="sheet-actions">
@@ -148,14 +155,85 @@
       </q-card>
     </q-dialog>
 
-    <!-- check-out (dialog result) -->
-    <ResultDialog
-      v-model="resultDialog"
+    <!-- ── horários (sheet) ── -->
+    <q-dialog v-model="horariosDialog" position="bottom" @hide="resetHorarios">
+      <q-card class="bottom-sheet horarios-sheet">
+
+        <!-- cabeçalho dinâmico -->
+        <q-card-section class="sheet-header">
+          <div class="horarios-header-left">
+            <q-btn v-if="horarioStep === 2" flat round dense icon="arrow_back" color="grey-7"
+                   @click="horarioStep = 1" />
+            <span class="sheet-title">
+              {{ horarioStep === 1 ? 'Horários' : horarioCarreiraLabel }}
+            </span>
+          </div>
+          <q-btn flat round dense icon="close" @click="horariosDialog = false" />
+        </q-card-section>
+
+        <!-- passo 1: selecionar carreira -->
+        <q-card-section v-if="horarioStep === 1" class="sheet-body">
+          <p class="sheet-desc">Escolhe uma carreira para ver os horários de hoje:</p>
+          <q-input v-model="horarioSearch" outlined dense placeholder="Pesquisar carreira..."
+                   class="q-mb-sm" clearable>
+            <template #prepend><q-icon name="search" color="grey-5" /></template>
+          </q-input>
+          <div v-if="carreirasLoading" class="text-center q-py-md">
+            <q-spinner color="blue-6" size="28px" />
+          </div>
+          <q-list v-else separator class="select-list">
+            <q-item v-for="c in carreirasFiltradas" :key="c.ID" clickable
+                    @click="selectCarreiraHorario(c.ID, c.num + ' — ' + c.nome)">
+              <q-item-section avatar>
+                <q-icon name="directions_bus" color="grey-5" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon name="chevron_right" color="grey-4" />
+              </q-item-section>
+            </q-item>
+            <q-item v-if="carreirasFiltradas.length === 0">
+              <q-item-section class="text-grey-5 text-caption text-center">Nenhuma carreira encontrada...</q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+
+        <!-- passo 2: horários por paragem -->
+        <q-card-section v-else class="sheet-body">
+          <q-input v-model="horarioParagemSearch" outlined dense placeholder="Pesquisar paragem..."
+                   class="q-mb-md" clearable>
+            <template #prepend><q-icon name="search" color="grey-5" /></template>
+          </q-input>
+          <div v-if="horariosLoading" class="text-center q-py-lg">
+            <q-spinner color="blue-6" size="32px" />
+          </div>
+          <div v-else-if="horariosByParagemFiltradas.length === 0" class="empty-state">
+            <p>Sem horários para hoje...</p>
+          </div>
+          <div v-else class="horarios-list">
+            <div v-for="entry in horariosByParagemFiltradas" :key="entry.paragemID" class="horario-row">
+              <div class="horario-paragem">{{ entry.paragemNome }}</div>
+              <div class="horario-times">
+                <span v-for="t in entry.times" :key="t"
+                      :class="['horario-chip', t < nowTime ? 'horario-chip--past' : '']">
+                  {{ t }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+
+      </q-card>
+    </q-dialog>
+
+    <!-- resultados -->
+    <ResultDialog v-model="resultDialog"
       :icon="resultIrregular ? 'warning' : 'check_circle'"
       :icon-color="resultIrregular ? 'orange-7' : 'green-6'"
       :title="resultIrregular ? 'Viagem irregular!' : 'Viagem concluída!'"
-      :message="resultIrregular ? 'O título não cobre todas as zonas percorridas.' : 'Check-out realizado com sucesso!'"
-    />
+      :message="resultIrregular ? 'O título não cobre todas as zonas percorridas!' : 'Check-out realizado com sucesso!'" />
   </q-page>
 </template>
 
@@ -165,12 +243,14 @@ import { useAuthStore } from 'stores/auth';
 import QrScanner from 'components/QRScanner.vue';
 import ZoneBadge from 'components/ZoneBadge.vue';
 import ResultDialog from 'components/ResultDialog.vue';
-import type { TituloDTO, ViagemDTO, ParagemDTO } from 'components/models';
+import CheckInSheet from 'components/CheckInSheet.vue';
+import type { TituloDTO, ViagemDTO, ParagemDTO, CarreiraDTO, HorarioDTO } from 'components/models';
 import { formatDate, formatDateTime } from 'src/utils/formatters';
 import { tripIconFromNome } from 'src/utils/titulo';
 import { titlesService } from 'src/services/titlesService';
 import { tripsService } from 'src/services/tripsService';
 import { stopsService } from 'src/services/stopsService';
+import { routesService } from 'src/services/routesService';
 
 const authStore = useAuthStore();
 
@@ -185,13 +265,61 @@ const activePasse   = computed(() =>
 const recentViagens = computed(() =>
   viagens.value.filter((v) => v.estado !== 'EM_CURSO').slice(0, 3));
 
+// check-in
+const checkinDialog = ref(false);
+
 // check-out
 const checkoutDialog  = ref(false);
 const checkoutParagem = ref<ParagemDTO | null>(null);
 const checkoutLoading = ref(false);
 const checkoutError   = ref('');
+
+// resultado check-out
 const resultDialog    = ref(false);
 const resultIrregular = ref(false);
+
+// horários
+const horariosDialog        = ref(false);
+const horarioStep           = ref<1 | 2>(1);
+const carreiras             = ref<CarreiraDTO[]>([]);
+const carreirasLoading      = ref(false);
+const horarioSearch         = ref('');
+const horarioCarreiraID     = ref<number | null>(null);
+const horarioCarreiraLabel  = ref('');
+const horarioParagemSearch  = ref('');
+const horariosLoading       = ref(false);
+const horarios              = ref<HorarioDTO[]>([]);
+
+const nowTime = computed(() => {
+  const d = new Date();
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+});
+
+const carreirasFiltradas = computed(() => {
+  const q = horarioSearch.value.trim().toLowerCase();
+  if (!q) return carreiras.value;
+  return carreiras.value.filter((c) => c.num.toLowerCase().includes(q) || c.nome.toLowerCase().includes(q));
+});
+
+const horariosByParagem = computed(() => {
+  const map = new Map<number, { paragemNome: string; times: string[] }>();
+  for (const h of horarios.value) {
+    const t = h.horaChegada.slice(0, 5); // "HH:mm"
+    if (!map.has(h.paragemID)) map.set(h.paragemID, { paragemNome: h.paragemNome, times: [] });
+    map.get(h.paragemID)!.times.push(t);
+  }
+  return Array.from(map.entries()).map(([paragemID, v]) => ({
+    paragemID,
+    paragemNome: v.paragemNome,
+    times: v.times.sort(),
+  }));
+});
+
+const horariosByParagemFiltradas = computed(() => {
+  const q = horarioParagemSearch.value.trim().toLowerCase();
+  if (!q) return horariosByParagem.value;
+  return horariosByParagem.value.filter((e) => e.paragemNome.toLowerCase().includes(q));
+});
 
 onMounted(() => {
   void Promise.allSettled([loadTitulos(), loadViagens(), loadViagemAtiva()]);
@@ -201,15 +329,18 @@ async function loadTitulos() {
   try   { titulos.value = await titlesService.getActive(); }
   finally { titulosLoading.value = false; }
 }
-
 async function loadViagens() {
   try   { viagens.value = await tripsService.getHistory(); }
   finally { viagensLoading.value = false; }
 }
-
 async function loadViagemAtiva() {
   try   { viagemAtiva.value = await tripsService.getActive(); }
   catch { viagemAtiva.value = null; }
+}
+
+function onCheckinDone(viagem: ViagemDTO) {
+  viagemAtiva.value = viagem;
+  void loadViagens();
 }
 
 async function onCheckoutQr(code: string) {
@@ -219,7 +350,7 @@ async function onCheckoutQr(code: string) {
   try {
     checkoutParagem.value = await stopsService.getByQr(code);
   } catch {
-    checkoutError.value = `Paragem não reconhecida: "${code}!"`;
+    checkoutError.value = `Paragem não reconhecida: "${code}"`;
   } finally { checkoutLoading.value = false; }
 }
 
@@ -244,17 +375,44 @@ function resetCheckout() {
   checkoutParagem.value = null;
   checkoutError.value   = '';
 }
+
+async function openHorarios() {
+  horariosDialog.value = true;
+  if (carreiras.value.length > 0) return;
+  carreirasLoading.value = true;
+  try { carreiras.value = await routesService.getAll(); }
+  finally { carreirasLoading.value = false; }
+}
+
+async function selectCarreiraHorario(id: number, label: string) {
+  horarioCarreiraID.value    = id;
+  horarioCarreiraLabel.value = label;
+  horarioParagemSearch.value = '';
+  horarioStep.value          = 2;
+  horariosLoading.value      = true;
+  const jsDay = new Date().getDay();
+  const day   = jsDay === 0 ? 7 : jsDay;
+  try { horarios.value = await routesService.getSchedules(id, day); }
+  finally { horariosLoading.value = false; }
+}
+
+function resetHorarios() {
+  horarioStep.value          = 1;
+  horarioCarreiraID.value    = null;
+  horarioCarreiraLabel.value = '';
+  horarioSearch.value        = '';
+  horarioParagemSearch.value = '';
+  horarios.value             = [];
+}
 </script>
 
 <style scoped>
-.home-page {
-  background: var(--et-bg);
-  min-height: 100dvh;
-}
+.home-page { background: var(--et-bg); min-height: 100dvh; }
 
 .home-header {
   background: var(--et-blue); padding: 52px 24px 28px;
   display: flex; justify-content: space-between; align-items: flex-start;
+  border-radius: 0 0 20px 20px;
 }
 .home-greeting-line  { display: flex; align-items: baseline; }
 .home-greeting-label { color: rgba(255,255,255,0.8); font-size: 22px; }
@@ -267,9 +425,7 @@ function resetCheckout() {
 .pass-card-top { display: flex; justify-content: space-between; margin-bottom: 12px; }
 .pass-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6); letter-spacing: 0.5px; }
 .pass-validade { text-align: right; }
-.pass-validade-label {
-  display: block; font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 0.5px;
-}
+.pass-validade-label { display: block; font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 0.5px; }
 .pass-validade-date  { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9); }
 .pass-type      { font-size: 20px; font-weight: 700; margin: 0; }
 .pass-zones-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -286,7 +442,6 @@ function resetCheckout() {
   font-size: 13px !important; font-weight: 700 !important; letter-spacing: 0.5px;
 }
 
-/* viagem ativa */
 .viagem-ativa-card { background: #16a34a; border-radius: 16px; padding: 16px; color: white; }
 .viagem-ativa-header {
   display: flex; align-items: center; gap: 8px;
@@ -300,14 +455,13 @@ function resetCheckout() {
   border-radius: 10px !important; height: 44px; font-weight: 700 !important; font-size: 13px !important;
 }
 
-/* check-in item */
-.checkin-item { background: white; border-radius: 12px; padding: 12px 16px; }
-.checkin-icon-wrap {
-  width: 44px; height: 44px; background: #f3f4f6; border-radius: 10px;
+.action-item { background: white; border-radius: 12px; padding: 12px 16px; }
+.action-icon-wrap {
+  width: 44px; height: 44px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
 }
-.checkin-title   { font-weight: 600; font-size: 15px; color: var(--et-text); }
-.checkin-caption { font-size: 12px; color: var(--et-subtext); white-space: normal; }
+.action-title   { font-weight: 600; font-size: 15px; color: var(--et-text); }
+.action-caption { font-size: 12px; color: var(--et-subtext); white-space: normal; }
 
 .section-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 4px 0; }
 .section-title  { font-weight: 700; font-size: 16px; color: var(--et-text); }
@@ -325,4 +479,37 @@ function resetCheckout() {
   background: #eff6ff; border-radius: 10px; padding: 12px 16px;
   font-size: 15px; font-weight: 600; color: var(--et-text);
 }
+
+/* grid de ações */
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.quick-btn {
+  background: white; border-radius: 14px; border: none; cursor: pointer;
+  padding: 18px 10px 14px; display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  font-size: 12px; font-weight: 700; color: var(--et-text);
+  text-align: center; line-height: 1.3;
+  transition: background 0.15s;
+}
+.quick-btn:active { background: #f3f4f6; }
+.quick-btn-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* horários (sheet) */
+.horarios-sheet { max-height: 88dvh; display: flex; flex-direction: column; }
+.horarios-header-left { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+.horarios-header-left .sheet-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.select-list    { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--et-border); }
+.item-selected  { background: #eff6ff !important; }
+
+.horarios-list { display: flex; flex-direction: column; gap: 8px; }
+.horario-row   { background: white; border-radius: 10px; padding: 12px 14px; }
+.horario-paragem { font-size: 13px; font-weight: 600; color: var(--et-text); margin-bottom: 6px; }
+.horario-times   { display: flex; flex-wrap: wrap; gap: 6px; }
+.horario-chip {
+  font-size: 12px; font-weight: 600; padding: 3px 10px;
+  border-radius: 20px; background: #eff6ff; color: var(--et-blue);
+}
+.horario-chip--past { background: #f3f4f6; color: #9ca3af; }
 </style>

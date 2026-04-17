@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -28,7 +29,14 @@ public class ParagemController {
     }
 
     @GetMapping("/{id}/routes")
-    public ResponseEntity<List<CarreiraDTO>> getCarreirasByParagem(@PathVariable Long id) {
+    public ResponseEntity<List<CarreiraDTO>> getCarreirasByParagem(
+            @PathVariable Long id,
+            @RequestParam(required = false) String time,
+            @RequestParam(required = false) Integer day) {
+        if (time != null && day != null) {
+            return ResponseEntity.ok(
+                    paragemService.getCarreirasByParagemOrdenadoPorHorario(id, LocalTime.parse(time), day));
+        }
         return ResponseEntity.ok(paragemService.getCarreirasByParagem(id));
     }
 }

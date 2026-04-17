@@ -2,8 +2,11 @@ package com.projeto_EA.AirBus.repositories;
 
 import com.projeto_EA.AirBus.models.entities.HorarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -16,4 +19,15 @@ public interface HorarioRepository extends JpaRepository<HorarioEntity, Long> {
     List<HorarioEntity> findByCarreiraIDAndParagemID(Long carreiraID, Long paragemID);
 
     List<HorarioEntity> findByCarreiraIDAndDiaSemana(Long carreiraID, int diaSemana);
+
+    @Query("""
+        SELECT h FROM HorarioEntity h
+        WHERE h.paragem.ID = :paragemId
+          AND h.diaSemana  = :diaSemana
+        ORDER BY h.horaChegada ASC
+        """)
+    List<HorarioEntity> findByParagemAndDia(
+        @Param("paragemId") Long paragemId,
+        @Param("diaSemana") int diaSemana
+    );
 }
