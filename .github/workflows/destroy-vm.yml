@@ -1,0 +1,40 @@
+name: destroy-vm
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DESTROY to delete the AirBus VM'
+        required: true
+
+concurrency:
+  group: vm-destroy
+  cancel-in-progress: false
+
+env:
+  GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+  GCP_ZONE: europe-west1-b
+  VM_NAME: airbus-vm
+
+jobs:
+  destroy:
+    if: github.event.inputs.confirm == 'DESTROY'
+    runs-on: ubuntu-latest
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Delete VM (if it exists)
+        run: |
+          if gcloud compute instances describe "$VM_NAME" \
+              --zone="$GCP_ZONE" --project="$GCP_PROJECT" >/dev/null 2>&1; then
+            gcloud compute instances delete "$VM_NAME" \
+              --zone="$GCP_ZONE" --project="$GCP_PROJECT" --quiet
+            echo "VM $VM_NAME deleted."
+          else
+            echo "VM $VM_NAME does not exist."
+          fi

@@ -24,3 +24,9 @@ Thumbs.db
 node_modules/
 dist/
 .npm/
+
+# GCP service account keys (never commit)
+*-silken-elevator-*.json
+silken-elevator-*.json
+ansible/*.json
+gcp-sa*.json
