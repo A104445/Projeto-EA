@@ -16,7 +16,7 @@ concurrency:
 
 env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
-  GCP_ZONE: us-central1
+  GCP_ZONE: us-central1-a
   VM_NAME: airbus-vm
   VM_MACHINE_IMAGE: ubuntu-docker-ea
   VM_USER: airbus
