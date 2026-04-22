@@ -93,7 +93,7 @@ jobs:
             if gcloud compute ssh "$VM_USER@$VM_NAME" \
                 --project="$GCP_PROJECT" --zone="$GCP_ZONE" \
                 --tunnel-through-iap --quiet \
-                --command='true'; then
+                --command='true' 2>/dev/null; then
               echo "VM ready."; exit 0
             fi
             echo "VM not ready yet ($i/30), retrying in 5s..."; sleep 5
