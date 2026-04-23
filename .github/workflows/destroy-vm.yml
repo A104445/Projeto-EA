@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type DESTROY to delete the AirBus VM'
+        description: "Type DESTROY to delete the AirBus VM"
         required: true
 
 concurrency:
@@ -13,7 +13,7 @@ concurrency:
 
 env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
-  GCP_ZONE: europe-west1-b
+  GCP_ZONE: us-central1-a
   VM_NAME: airbus-vm
 
 jobs:
