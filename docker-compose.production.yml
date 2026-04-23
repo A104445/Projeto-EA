@@ -9,7 +9,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-airbus}"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -37,7 +37,11 @@ services:
       backend:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost/healthz | grep -q ok || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://localhost/healthz | grep -q ok || exit 1",
+        ]
       interval: 15s
       timeout: 5s
       retries: 6
