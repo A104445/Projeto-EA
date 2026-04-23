@@ -1,13 +1,13 @@
 package com.projeto_EA.AirBus.repositories;
 
-import com.projeto_EA.AirBus.models.entities.HorarioEntity;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalTime;
-import java.util.List;
+import com.projeto_EA.AirBus.models.entities.HorarioEntity;
 
 @Repository
 public interface HorarioRepository extends JpaRepository<HorarioEntity, Long> {
