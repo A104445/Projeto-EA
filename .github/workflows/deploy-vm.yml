@@ -3,7 +3,7 @@ name: deploy-vm
 on:
   workflow_dispatch:
   push:
-    branches: [main, jc/ci-cd]
+    branches: [main]
     paths:
       - "backend/**"
       - "app/**"
