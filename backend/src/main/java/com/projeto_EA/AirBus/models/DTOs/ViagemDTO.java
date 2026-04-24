@@ -19,6 +19,7 @@ public class ViagemDTO {
     private String origemNome;
     private String destinoNome;
     private String tipoTitulo;
+    private String matriculaVeiculo;
 
     public ViagemDTO(ViagemEntity v) {
         this.ID = v.getID();
@@ -31,5 +32,6 @@ public class ViagemDTO {
         this.origemNome = v.getOrigem().getNome();
         this.destinoNome = v.getDestino() != null ? v.getDestino().getNome() : null;
         this.tipoTitulo = v.getTitulo().getTipo();
+        this.matriculaVeiculo = v.getVeiculo() != null ? v.getVeiculo().getMatricula() : null;
     }
 }

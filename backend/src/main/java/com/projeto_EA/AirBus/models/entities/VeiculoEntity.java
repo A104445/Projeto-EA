@@ -23,6 +23,10 @@ public class VeiculoEntity {
     @Column(nullable = false)
     private int ocupacaoAtual = 0;
 
+    @ManyToOne
+    @JoinColumn(name = "carreira_id")
+    private CarreiraEntity carreira;
+
     public void incrementarOcupacao() {
         if (ocupacaoAtual < capacidade) ocupacaoAtual++;
     }
@@ -31,8 +35,9 @@ public class VeiculoEntity {
         if (ocupacaoAtual > 0) ocupacaoAtual--;
     }
 
-    public VeiculoEntity(String matricula, int capacidade) {
+    public VeiculoEntity(String matricula, int capacidade, CarreiraEntity carreira) {
         this.matricula = matricula;
         this.capacidade = capacidade;
+        this.carreira = carreira;
     }
 }

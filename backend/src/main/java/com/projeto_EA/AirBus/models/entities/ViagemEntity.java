@@ -31,6 +31,10 @@ public class ViagemEntity {
     @JoinColumn(name = "carreira_id")
     private CarreiraEntity carreira;
 
+    @ManyToOne
+    @JoinColumn(name = "veiculo_id")
+    private VeiculoEntity veiculo;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "origem_id")
     private ParagemEntity origem;

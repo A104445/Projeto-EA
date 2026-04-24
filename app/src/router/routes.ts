@@ -37,6 +37,10 @@ const routes: RouteRecordRaw[] = [
         path: 'perfil',
         component: () => import('pages/PerfilPage.vue'),
       },
+      {
+        path: 'notificacoes',
+        component: () => import('pages/NotificacoesPage.vue'),
+      },
     ],
   },
 

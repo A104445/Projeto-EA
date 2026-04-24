@@ -5,7 +5,9 @@
       <div class="home-greeting-line">
         <span class="home-greeting-label">Olá,&nbsp;</span><span class="home-greeting-name">{{ authStore.firstName }}!</span>
       </div>
-      <q-btn flat round icon="notifications_none" color="white" />
+      <q-btn flat round icon="notifications_none" color="white" @click="$router.push('/app/notificacoes')">
+        <q-badge v-if="numNotificacoes > 0" color="red" floating :label="numNotificacoes" />
+      </q-btn>
     </div>
 
     <div class="home-content">
@@ -251,6 +253,8 @@ import { titlesService } from 'src/services/titlesService';
 import { tripsService } from 'src/services/tripsService';
 import { stopsService } from 'src/services/stopsService';
 import { routesService } from 'src/services/routesService';
+import { notificacoesService } from 'src/services/notificacoesService';
+import { useNotificacoesStore } from 'stores/notificacoes';
 
 const authStore = useAuthStore();
 
@@ -259,6 +263,8 @@ const titulosLoading = ref(true);
 const viagens        = ref<ViagemDTO[]>([]);
 const viagensLoading = ref(true);
 const viagemAtiva    = ref<ViagemDTO | null>(null);
+const notificacoesStore = useNotificacoesStore();
+const numNotificacoes = computed(() => notificacoesStore.count);
 
 const activePasse   = computed(() =>
   titulos.value.find((t) => t.valido && t.tipo?.toLowerCase().includes('passe')));
@@ -321,10 +327,6 @@ const horariosByParagemFiltradas = computed(() => {
   return horariosByParagem.value.filter((e) => e.paragemNome.toLowerCase().includes(q));
 });
 
-onMounted(() => {
-  void Promise.allSettled([loadTitulos(), loadViagens(), loadViagemAtiva()]);
-});
-
 async function loadTitulos() {
   try   { titulos.value = await titlesService.getActive(); }
   finally { titulosLoading.value = false; }
@@ -337,6 +339,14 @@ async function loadViagemAtiva() {
   try   { viagemAtiva.value = await tripsService.getActive(); }
   catch { viagemAtiva.value = null; }
 }
+async function loadNotificacoes() {
+  try { notificacoesStore.set((await notificacoesService.getAll()).length); }
+  catch { notificacoesStore.set(0); }
+}
+
+onMounted(() => {
+  void Promise.allSettled([loadTitulos(), loadViagens(), loadViagemAtiva(), loadNotificacoes()]);
+});
 
 function onCheckinDone(viagem: ViagemDTO) {
   viagemAtiva.value = viagem;
@@ -378,7 +388,6 @@ function resetCheckout() {
 
 async function openHorarios() {
   horariosDialog.value = true;
-  if (carreiras.value.length > 0) return;
   carreirasLoading.value = true;
   try { carreiras.value = await routesService.getAll(); }
   finally { carreirasLoading.value = false; }

@@ -2,8 +2,10 @@ package com.projeto_EA.AirBus.services;
 
 import com.projeto_EA.AirBus.models.DTOs.CarreiraDTO;
 import com.projeto_EA.AirBus.models.DTOs.ParagemDTO;
+import com.projeto_EA.AirBus.models.DTOs.VeiculoDTO;
 import com.projeto_EA.AirBus.models.entities.CarreiraEntity;
 import com.projeto_EA.AirBus.models.entities.HorarioEntity;
+import com.projeto_EA.AirBus.models.entities.VeiculoEntity;
 import com.projeto_EA.AirBus.repositories.CarreiraRepository;
 import com.projeto_EA.AirBus.repositories.HorarioRepository;
 import com.projeto_EA.AirBus.repositories.ParagemRepository;
@@ -93,6 +95,27 @@ public class ParagemService {
                     CarreiraDTO dto = new CarreiraDTO(c);
                     LocalTime t = proximaChegada.get(c.getID());
                     if (t != null) dto.setProximaChegada(t.format(fmt));
+
+                    // calcular o veículo alocado ao próximo horário
+                    List<VeiculoEntity> veiculos = c.getVeiculos().stream()
+                            .sorted(Comparator.comparing(VeiculoEntity::getID))
+                            .collect(Collectors.toList());
+                    if (!veiculos.isEmpty()) {
+                        List<HorarioEntity> carreiraHorarios = horarios.stream()
+                                .filter(h -> h.getCarreira().getID().equals(c.getID()))
+                                .collect(Collectors.toList()); // já ordenados por horaChegada ASC
+                        if (!carreiraHorarios.isEmpty()) {
+                            int idx = carreiraHorarios.size() - 1;
+                            for (int i = 0; i < carreiraHorarios.size(); i++) {
+                                if (!carreiraHorarios.get(i).getHoraChegada().isBefore(hora)) {
+                                    idx = i;
+                                    break;
+                                }
+                            }
+                            dto.setVeiculoProximo(new VeiculoDTO(veiculos.get(idx % veiculos.size())));
+                        }
+                    }
+
                     return dto;
                 })
                 .collect(Collectors.toList());

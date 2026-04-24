@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +25,7 @@ public class ViagemService {
     private final CarreiraRepository carreiraRepository;
     private final ParagemRepository paragemRepository;
     private final VeiculoRepository veiculoRepository;
+    private final HorarioRepository horarioRepository;
 
     @Transactional
     public ViagemDTO checkIn(Long userID, CheckInRequestDTO dto) {
@@ -58,9 +61,13 @@ public class ViagemService {
         viagem.setOrigem(paragem);
         viagem.setDataHoraEntrada(LocalDateTime.now());
 
-        if (carreira.getVeiculo() != null) {
-            carreira.getVeiculo().incrementarOcupacao();
-            veiculoRepository.save(carreira.getVeiculo());
+        VeiculoEntity veiculo = dto.getVeiculoID() != null
+                ? veiculoRepository.findById(dto.getVeiculoID()).orElse(null)
+                : findNextVeiculo(carreira, paragem);
+        viagem.setVeiculo(veiculo);
+        if (veiculo != null) {
+            veiculo.incrementarOcupacao();
+            veiculoRepository.save(veiculo);
         }
 
         return new ViagemDTO(viagemRepository.save(viagem));
@@ -93,9 +100,9 @@ public class ViagemService {
         titulo.aoFinalizarViagem();
         tituloRepository.save(titulo);
 
-        if (viagem.getCarreira().getVeiculo() != null) {
-            viagem.getCarreira().getVeiculo().decrementarOcupacao();
-            veiculoRepository.save(viagem.getCarreira().getVeiculo());
+        if (viagem.getVeiculo() != null) {
+            viagem.getVeiculo().decrementarOcupacao();
+            veiculoRepository.save(viagem.getVeiculo());
         }
 
         return new ViagemDTO(viagemRepository.save(viagem));
@@ -110,6 +117,28 @@ public class ViagemService {
         return viagemRepository.findByUtenteIDOrderByDataHoraEntradaDesc(userID).stream()
                 .map(ViagemDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    private VeiculoEntity findNextVeiculo(CarreiraEntity carreira, ParagemEntity paragem) {
+        List<VeiculoEntity> veiculos = veiculoRepository.findByCarreiraIDOrderByID(carreira.getID());
+        if (veiculos.isEmpty()) return null;
+
+        int diaSemana = LocalDate.now().getDayOfWeek().getValue(); // 1=Seg, 7=Dom
+        LocalTime agora = LocalTime.now();
+
+        List<HorarioEntity> horarios = horarioRepository
+                .findByCarreiraIDAndParagemIDAndDiaSemanaOrderByHoraChegada(
+                        carreira.getID(), paragem.getID(), diaSemana);
+
+        int idx = horarios.size() - 1; // fallback: último horário do dia
+        for (int i = 0; i < horarios.size(); i++) {
+            if (!horarios.get(i).getHoraChegada().isBefore(agora)) {
+                idx = i;
+                break;
+            }
+        }
+
+        return veiculos.get(idx % veiculos.size());
     }
 
     private Set<ZonaGeograficaEntity> calcularZonasPercorridas(

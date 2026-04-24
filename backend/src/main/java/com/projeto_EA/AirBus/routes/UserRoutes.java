@@ -8,5 +8,6 @@ public class UserRoutes {
     public static final String PARAGENS     = "/api/stops";
     public static final String CARREIRAS    = "/api/routes";
     public static final String HORARIOS     = "/api/schedules";
-    public static final String ZONAS        = "/api/zones";
+    public static final String ZONAS          = "/api/zones";
+    public static final String NOTIFICACOES   = "/api/notifications";
 }

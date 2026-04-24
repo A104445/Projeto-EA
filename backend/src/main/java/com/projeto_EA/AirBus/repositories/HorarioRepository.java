@@ -30,4 +30,7 @@ public interface HorarioRepository extends JpaRepository<HorarioEntity, Long> {
         @Param("paragemId") Long paragemId,
         @Param("diaSemana") int diaSemana
     );
+
+    List<HorarioEntity> findByCarreiraIDAndParagemIDAndDiaSemanaOrderByHoraChegada(
+        Long carreiraID, Long paragemID, int diaSemana);
 }

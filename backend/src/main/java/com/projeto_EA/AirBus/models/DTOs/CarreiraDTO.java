@@ -15,9 +15,8 @@ public class CarreiraDTO {
     private String nome;
     private String estado;
     private List<ParagemDTO> paragens;
-    private Integer ocupacaoAtual;
-    private Integer capacidade;
     private String proximaChegada; // "HH:mm" — preenchido apenas quando ordenado por horário
+    private VeiculoDTO veiculoProximo; // preenchido apenas no contexto de check-in
 
     public CarreiraDTO(CarreiraEntity c) {
         this.ID = c.getID();
@@ -27,9 +26,5 @@ public class CarreiraDTO {
         this.paragens = c.getParagens().stream()
                 .map(ParagemDTO::new)
                 .collect(Collectors.toList());
-        if (c.getVeiculo() != null) {
-            this.ocupacaoAtual = c.getVeiculo().getOcupacaoAtual();
-            this.capacidade = c.getVeiculo().getCapacidade();
-        }
     }
 }

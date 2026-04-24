@@ -15,4 +15,6 @@ public interface ViagemRepository extends JpaRepository<ViagemEntity, Long> {
     Optional<ViagemEntity> findByUtenteIDAndEstado(Long utenteID, String estado);
 
     long countByCarreiraIDAndEstado(Long carreiraID, String estado);
+
+    List<ViagemEntity> findByUtenteIDAndIrregularTrue(Long utenteID);
 }

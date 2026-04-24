@@ -15,4 +15,6 @@ public class CheckInRequestDTO {
 
     @NotNull
     private Long tituloID;
+
+    private Long veiculoID; // (opcional) veículo apresentado na UI
 }

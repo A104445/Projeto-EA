@@ -8,8 +8,8 @@ export const tripsService = {
   getActive: () =>
     api.get<ViagemDTO | null>('/api/trips/active').then((r) => r.data ?? null),
 
-  checkIn: (paragemID: number, carreiraID: number, tituloID: number) =>
-    api.post<ViagemDTO>('/api/trips/check-in', { paragemID, carreiraID, tituloID }).then((r) => r.data),
+  checkIn: (paragemID: number, carreiraID: number, tituloID: number, veiculoID?: number) =>
+    api.post<ViagemDTO>('/api/trips/check-in', { paragemID, carreiraID, tituloID, veiculoID }).then((r) => r.data),
 
   checkOut: (viagemID: number, paragemID: number) =>
     api.post<ViagemDTO>(`/api/trips/${viagemID}/check-out`, { paragemID }).then((r) => r.data),

@@ -42,9 +42,16 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
-              <q-item-label v-if="c.proximaChegada" caption>
-                <q-icon name="schedule" size="11px" /> próximo: {{ c.proximaChegada }}
-              </q-item-label>
+              <div class="carreira-pills">
+                <span v-if="c.proximaChegada" class="pill pill-time">
+                  <q-icon name="schedule" size="11px" />
+                  {{ c.proximaChegada }}
+                </span>
+                <span v-if="c.veiculoProximo" class="pill" :class="ocupacaoPillClass(c.veiculoProximo)">
+                  <q-icon name="person" size="11px" />
+                  {{ c.veiculoProximo.ocupacaoAtual }}/{{ c.veiculoProximo.capacidade }}
+                </span>
+              </div>
             </q-item-section>
             <q-item-section side>
               <q-icon v-if="selectedCarreiraID === c.ID" name="check_circle" color="blue-7" />
@@ -112,7 +119,7 @@
 import { ref, computed } from 'vue';
 import QrScanner from 'components/QRScanner.vue';
 import ZoneBadge from 'components/ZoneBadge.vue';
-import type { ParagemDTO, CarreiraDTO, TituloDTO, ViagemDTO } from 'components/models';
+import type { ParagemDTO, CarreiraDTO, TituloDTO, ViagemDTO, VeiculoDTO } from 'components/models';
 import { tipoIcon } from 'src/utils/titulo';
 import { titlesService } from 'src/services/titlesService';
 import { tripsService } from 'src/services/tripsService';
@@ -175,10 +182,12 @@ async function confirmarCheckIn() {
   submitError.value   = '';
   submitLoading.value = true;
   try {
+    const carreira = carreiras.value.find((c) => c.ID === selectedCarreiraID.value);
     viagem.value = await tripsService.checkIn(
       paragem.value!.ID,
       selectedCarreiraID.value!,
       selectedTituloID.value!,
+      carreira?.veiculoProximo?.ID,
     );
     step.value = 3;
     emit('done', viagem.value);
@@ -186,6 +195,14 @@ async function confirmarCheckIn() {
     const err = e as { response?: { data?: { message?: string } } };
     submitError.value = err?.response?.data?.message ?? 'Ocorreu um erro ao iniciar a viagem.';
   } finally { submitLoading.value = false; }
+}
+
+function ocupacaoPillClass(v: VeiculoDTO): string {
+  if (v.capacidade === 0) return 'pill-green';
+  const pct = (v.ocupacaoAtual / v.capacidade) * 100;
+  if (pct >= 80) return 'pill-red';
+  if (pct >= 50) return 'pill-orange';
+  return 'pill-green';
 }
 
 function reset() {
@@ -220,4 +237,16 @@ function reset() {
   background: #fffbeb; border-radius: 10px; padding: 12px 16px;
   font-size: 14px; color: #92400e;
 }
+
+.carreira-pills { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+}
+.pill-time   { background: #f3f4f6; color: #6b7280; }
+.pill-green  { background: #dcfce7; color: #16a34a; }
+.pill-orange { background: #ffedd5; color: #ea580c; }
+.pill-red    { background: #fee2e2; color: #dc2626; }
 </style>

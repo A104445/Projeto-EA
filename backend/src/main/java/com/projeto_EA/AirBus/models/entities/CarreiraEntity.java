@@ -35,9 +35,8 @@ public class CarreiraEntity {
     @OrderColumn(name = "ordem")
     private List<ParagemEntity> paragens = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "veiculo_id")
-    private VeiculoEntity veiculo;
+    @OneToMany(mappedBy = "carreira", cascade = CascadeType.ALL)
+    private List<VeiculoEntity> veiculos = new ArrayList<>();
 
     public CarreiraEntity(String num, String nome) {
         this.num = num;

@@ -26,12 +26,20 @@ export interface ParagemDTO {
   qr: string;
 }
 
+export interface VeiculoDTO {
+  ID: number;
+  matricula: string;
+  capacidade: number;
+  ocupacaoAtual: number;
+}
+
 export interface CarreiraDTO {
   ID: number;
   num: string;
   nome: string;
   paragens?: ParagemDTO[];
   proximaChegada?: string; // "HH:mm" — presente quando ordenado por horário
+  veiculoProximo?: VeiculoDTO; // presente no contexto de check-in
 }
 
 export interface HorarioDTO {
@@ -63,4 +71,10 @@ export interface ViagemDTO {
   origemNome: string;
   destinoNome?: string;
   irregular?: boolean;
+}
+
+export interface NotificacaoDTO {
+  tipo: 'PASSE_EXPIRANDO' | 'PASSE_EXPIRADO' | 'SALDO_BAIXO' | 'VIAGEM_IRREGULAR';
+  mensagem: string;
+  tituloID: number;
 }
