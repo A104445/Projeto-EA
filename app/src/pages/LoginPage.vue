@@ -120,6 +120,7 @@ const showPwd = ref(false);
 const loading = ref(false);
 const googleLoading = ref(false);
 const error = ref('');
+const hasGoogleClientId = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim());
 
 async function handleLogin() {
   error.value = '';
@@ -151,13 +152,17 @@ const handleOnError = () => {
   error.value = 'Erro ao fazer login com o Google!';
 };
 
-const { isReady, login } = useCodeClient({
-  onSuccess: (response) => {
-    void handleOnSuccess(response);
-  },
-  onError: handleOnError,
-  scope: GOOGLE_SCOPE,
-});
+const googleClient = hasGoogleClientId
+  ? useCodeClient({
+      onSuccess: (response) => {
+        void handleOnSuccess(response);
+      },
+      onError: handleOnError,
+      scope: GOOGLE_SCOPE,
+    })
+  : { isReady: ref(false), login: () => undefined };
+
+const { isReady, login } = googleClient;
 </script>
 
 <style scoped>

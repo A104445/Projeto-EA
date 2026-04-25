@@ -1,10 +1,32 @@
-// Configuration for your app
-// https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
-
 import { defineConfig } from '#q-app/wrappers';
 import { fileURLToPath } from 'node:url';
 
+type VitePluginEntry = [string, any, { server?: boolean; client?: boolean }?];
+
 export default defineConfig((ctx) => {
+  const isPlaywright = process.env.PLAYWRIGHT === '1';
+
+  const vueI18nPlugin: VitePluginEntry = [
+    '@intlify/unplugin-vue-i18n/vite',
+    {
+      ssr: ctx.modeName === 'ssr',
+      include: [fileURLToPath(new URL('./src/i18n', import.meta.url))],
+    },
+  ];
+  const checkerPlugin: VitePluginEntry = [
+    'vite-plugin-checker',
+    {
+      vueTsc: true,
+      eslint: {
+        lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
+        useFlatConfig: true,
+      },
+    },
+    { server: false },
+  ];
+
+  const vitePlugins: VitePluginEntry[] = [vueI18nPlugin, ...(!isPlaywright ? [checkerPlugin] : [])];
+
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -63,36 +85,7 @@ export default defineConfig((ctx) => {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
-      vitePlugins: [
-        [
-          '@intlify/unplugin-vue-i18n/vite',
-          {
-            // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
-            // compositionOnly: false,
-
-            // if you want to use named tokens in your Vue I18n messages, such as 'Hello {name}',
-            // you need to set `runtimeOnly: false`
-            // runtimeOnly: false,
-
-            ssr: ctx.modeName === 'ssr',
-
-            // you need to set i18n resource including paths !
-            include: [fileURLToPath(new URL('./src/i18n', import.meta.url))],
-          },
-        ],
-
-        [
-          'vite-plugin-checker',
-          {
-            vueTsc: true,
-            eslint: {
-              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
-              useFlatConfig: true,
-            },
-          },
-          { server: false },
-        ],
-      ],
+      vitePlugins,
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
