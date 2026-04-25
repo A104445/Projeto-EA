@@ -148,4 +148,4 @@ jobs:
               sudo docker compose ps"
 
           echo "Add the following origin to your Google Cloud OAuth js origins and redirect urls: http://$VM_IP.nip.io"
-          echo "AirBus reachable at: http://$VM_IP"
+          echo "AirBus reachable at: http://$VM_IP.nip.io"
