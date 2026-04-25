@@ -3,7 +3,7 @@ package com.projeto_EA.AirBus.controllers;
 import com.projeto_EA.AirBus.models.DTOs.CarreiraDTO;
 import com.projeto_EA.AirBus.models.DTOs.ParagemDTO;
 import com.projeto_EA.AirBus.services.ParagemService;
-import com.projeto_EA.AirBus.routes.UserRoutes;
+import com.projeto_EA.AirBus.routes.Routes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @RestController
-@RequestMapping(UserRoutes.PARAGENS)
+@RequestMapping(Routes.PARAGENS)
 @RequiredArgsConstructor
 public class ParagemController {
 

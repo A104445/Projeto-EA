@@ -1,6 +1,6 @@
 package com.projeto_EA.AirBus.config;
 
-import com.projeto_EA.AirBus.routes.UserRoutes;
+import com.projeto_EA.AirBus.routes.Routes;
 import com.projeto_EA.AirBus.security.JwtAuthFilter;
 import com.projeto_EA.AirBus.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(UserRoutes.AUTH + "/**").permitAll()
+                        .requestMatchers(Routes.AUTH + "/**").permitAll()
                         .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
                         .anyRequest().authenticated()
                 )

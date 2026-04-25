@@ -39,6 +39,13 @@ export const useAuthStore = defineStore('auth', () => {
     setAuth(data.token, data.user);
   }
 
+  async function loginWithGoogle(code: string) {
+    const { data } = await api.post<{ token: string; user: User }>('/api/auth/google', {
+      code,
+    });
+    setAuth(data.token, data.user);
+  }
+
   async function register(nome: string, email: string, password: string) {
     const { data } = await api.post<{ token: string; user: User }>('/api/auth/register', {
       nome,
@@ -48,5 +55,5 @@ export const useAuthStore = defineStore('auth', () => {
     setAuth(data.token, data.user);
   }
 
-  return { token, user, isAuthenticated, firstName, login, register, logout };
+  return { token, user, isAuthenticated, firstName, login, loginWithGoogle, register, logout };
 });

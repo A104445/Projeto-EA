@@ -1,7 +1,6 @@
 <template>
   <q-page class="auth-page">
     <div class="auth-container">
-
       <q-btn flat round icon="arrow_back" color="grey-7" class="back-btn" @click="$router.back()" />
 
       <div class="auth-header">
@@ -17,7 +16,10 @@
             outlined
             placeholder="o teu endereço de e-mail"
             type="email"
-            :rules="[(v) => !!v || 'Campo obrigatório!', (v) => /.+@.+/.test(v) || 'E-mail inválido!']"
+            :rules="[
+              (v) => !!v || 'Campo obrigatório!',
+              (v) => /.+@.+/.test(v) || 'E-mail inválido!',
+            ]"
             class="et-input"
             no-error-icon
           />
@@ -58,40 +60,65 @@
           class="et-btn-primary full-width auth-submit-btn"
           label="INICIAR SESSÃO"
           :loading="loading"
+          :disable="googleLoading"
         />
       </q-form>
 
-      <!-- social login (isto nem deve ser para implementar) -->
       <div class="social-section">
         <div class="et-divider-text">Ou continue com</div>
         <div class="social-buttons">
-          <q-btn round flat bordered class="google-btn">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" />
+          <q-btn
+            round
+            flat
+            bordered
+            class="google-btn"
+            :loading="googleLoading"
+            :disable="loading || !isReady"
+            @click="() => login()"
+          >
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+              width="20"
+            />
           </q-btn>
         </div>
       </div>
 
-      <!-- register link -->
       <p class="switch-link">
         Não tens conta?
-        <q-btn flat no-caps dense label="Registar" color="blue-6" @click="$router.push('/register')" />
+        <q-btn
+          flat
+          no-caps
+          dense
+          label="Registar"
+          color="blue-6"
+          @click="$router.push('/register')"
+        />
       </p>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from 'stores/auth';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from 'stores/auth';
+import {
+  useCodeClient,
+  type ImplicitFlowSuccessResponse,
+} from 'vue3-google-signin';
 
 const router = useRouter();
 const authStore = useAuthStore();
+
+const GOOGLE_SCOPE = 'openid email profile';
 
 const email = ref('');
 const password = ref('');
 const showPwd = ref(false);
 const loading = ref(false);
+const googleLoading = ref(false);
 const error = ref('');
 
 async function handleLogin() {
@@ -106,6 +133,31 @@ async function handleLogin() {
     loading.value = false;
   }
 }
+
+const handleOnSuccess = async (response: ImplicitFlowSuccessResponse) => {
+  googleLoading.value = true;
+  try {
+    await authStore.loginWithGoogle(response.code);
+    await router.push('/app');
+  } catch {
+    error.value = 'Erro ao fazer login com o Google!';
+  } finally {
+    googleLoading.value = false;
+  }
+};
+
+const handleOnError = () => {
+  googleLoading.value = false;
+  error.value = 'Erro ao fazer login com o Google!';
+};
+
+const { isReady, login } = useCodeClient({
+  onSuccess: (response) => {
+    void handleOnSuccess(response);
+  },
+  onError: handleOnError,
+  scope: GOOGLE_SCOPE,
+});
 </script>
 
 <style scoped>

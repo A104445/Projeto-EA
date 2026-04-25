@@ -4,14 +4,14 @@ import com.projeto_EA.AirBus.models.DTOs.UserDTO;
 import com.projeto_EA.AirBus.models.DTOs.UserUpdateDTO;
 import com.projeto_EA.AirBus.models.entities.UserEntity;
 import com.projeto_EA.AirBus.services.UserService;
-import com.projeto_EA.AirBus.routes.UserRoutes;
+import com.projeto_EA.AirBus.routes.Routes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(UserRoutes.UTILIZADORES)
+@RequestMapping(Routes.UTILIZADORES)
 @RequiredArgsConstructor
 public class UserController {
 

@@ -1,18 +1,24 @@
 package com.projeto_EA.AirBus.controllers;
 
-import com.projeto_EA.AirBus.models.DTOs.CarreiraDTO;
-import com.projeto_EA.AirBus.models.DTOs.HorarioDTO;
-import com.projeto_EA.AirBus.services.CarreiraService;
-import com.projeto_EA.AirBus.services.HorarioService;
-import com.projeto_EA.AirBus.routes.UserRoutes;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.projeto_EA.AirBus.models.DTOs.CarreiraDTO;
+import com.projeto_EA.AirBus.models.DTOs.HorarioDTO;
+import com.projeto_EA.AirBus.routes.Routes;
+import com.projeto_EA.AirBus.services.CarreiraService;
+import com.projeto_EA.AirBus.services.HorarioService;
+
+import lombok.RequiredArgsConstructor;
+
 @RestController
-@RequestMapping(UserRoutes.CARREIRAS)
+@RequestMapping(Routes.CARREIRAS)
 @RequiredArgsConstructor
 public class CarreiraController {
 

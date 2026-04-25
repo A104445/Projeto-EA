@@ -1,6 +1,6 @@
 package com.projeto_EA.AirBus.routes;
 
-public class UserRoutes {
+public class Routes {
     public static final String AUTH         = "/api/auth";
     public static final String UTILIZADORES = "/api/users";
     public static final String TITULOS      = "/api/tickets";

@@ -30,3 +30,6 @@ dist/
 silken-elevator-*.json
 ansible/*.json
 gcp-sa*.json
+
+.codex
+context/

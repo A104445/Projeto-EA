@@ -1,0 +1,8 @@
+import { defineBoot } from '#q-app/wrappers';
+import GoogleSignInPlugin from 'vue3-google-signin';
+
+export default defineBoot(({ app }) => {
+  app.use(GoogleSignInPlugin, {
+    clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+  });
+});

@@ -4,7 +4,7 @@ import com.projeto_EA.AirBus.models.DTOs.*;
 import com.projeto_EA.AirBus.models.entities.UserEntity;
 import com.projeto_EA.AirBus.services.ViagemService;
 import jakarta.validation.Valid;
-import com.projeto_EA.AirBus.routes.UserRoutes;
+import com.projeto_EA.AirBus.routes.Routes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(UserRoutes.VIAGENS)
+@RequestMapping(Routes.VIAGENS)
 @RequiredArgsConstructor
 public class ViagemController {
 
