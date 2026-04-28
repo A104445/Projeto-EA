@@ -1,5 +1,7 @@
 package com.projeto_EA.AirBus.models.entities;
 
+import com.projeto_EA.AirBus.models.DTOs.NotificacaoDTO;
+import com.projeto_EA.AirBus.models.enums.EstadoGeral;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,28 +9,35 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "titulo_transporte")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_titulo", discriminatorType = DiscriminatorType.STRING)
-@Getter @Setter @NoArgsConstructor
+@Getter @NoArgsConstructor
 public abstract class TituloTransporteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
 
-    @ManyToOne(optional = false)
+    @Setter @ManyToOne(optional = false)
     @JoinColumn(name = "utente_id")
     private UserEntity utente;
 
     @Column(nullable = false)
-    private LocalDateTime dataAquisicao = LocalDateTime.now();
+    private LocalDateTime dataAquisicao;
 
+    @PrePersist
+    private void prePersist() {
+        this.dataAquisicao = LocalDateTime.now();
+    }
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String estado = "ATIVO";
+    private EstadoGeral estado = EstadoGeral.ATIVO;
 
     @ManyToMany
     @JoinTable(
@@ -38,7 +47,16 @@ public abstract class TituloTransporteEntity {
     )
     private Set<ZonaGeograficaEntity> zonas = new HashSet<>();
 
+    public void definirZonas(Set<ZonaGeograficaEntity> novasZonas) {
+        this.zonas.clear();
+        this.zonas.addAll(novasZonas);
+    }
+
     public abstract boolean isValid();
+
+    public List<NotificacaoDTO> gerarNotificacoes() {
+        return List.of();
+    }
 
 
     public void validarParaCheckIn(CarreiraEntity carreira, ParagemEntity paragem) {
@@ -58,8 +76,17 @@ public abstract class TituloTransporteEntity {
         // no-op por defeito
     }
 
-    public String getTipo() {
-        DiscriminatorValue dv = this.getClass().getAnnotation(DiscriminatorValue.class);
-        return dv != null ? dv.value() : "DESCONHECIDO";
+    public abstract String getTipo();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TituloTransporteEntity other)) return false;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

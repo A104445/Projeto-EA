@@ -1,6 +1,7 @@
 package com.projeto_EA.AirBus.services;
 
 import com.projeto_EA.AirBus.models.DTOs.CarreiraDTO;
+import com.projeto_EA.AirBus.models.enums.EstadoGeral;
 import com.projeto_EA.AirBus.repositories.CarreiraRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class CarreiraService {
 
     @Transactional(readOnly = true)
     public List<CarreiraDTO> getAllCarreiras() {
-        return carreiraRepository.findByEstado("ATIVO").stream()
+        return carreiraRepository.findByEstado(EstadoGeral.ATIVO).stream()
                 .map(CarreiraDTO::new)
                 .collect(Collectors.toList());
     }

@@ -75,11 +75,11 @@ function endpointKey(method: string, pathname: string): string {
 }
 
 function nextTitleId(state: ApiState): number {
-  return Math.max(0, ...state.titlesAll.map((title) => title.ID)) + 1;
+  return Math.max(0, ...state.titlesAll.map((title) => title.id)) + 1;
 }
 
 function zoneNamesFromIds(state: ApiState, zonaIDs: number[]): string[] {
-  return state.zones.filter((zona) => zonaIDs.includes(zona.ID)).map((zona) => zona.nome);
+  return state.zones.filter((zona) => zonaIDs.includes(zona.id)).map((zona) => zona.nome);
 }
 
 export async function mockApi(page: Page, state: ApiState) {
@@ -146,7 +146,7 @@ export async function mockApi(page: Page, state: ApiState) {
     if (key === 'POST /api/tickets/annual-pass') {
       const payload = request.postDataJSON() as { zonaIDs: number[] };
       const title: TituloDTO = {
-        ID: nextTitleId(state),
+        id: nextTitleId(state),
         tipo: 'PASSE_ANUAL',
         estado: 'ATIVO',
         valido: true,
@@ -160,10 +160,10 @@ export async function mockApi(page: Page, state: ApiState) {
     }
 
     if (key === 'POST /api/tickets/single-ticket') {
-      const payload = request.postDataJSON() as { carreiraID: number };
-      const routeInfo = state.routes.find((entry) => entry.ID === payload.carreiraID);
+      const payload = request.postDataJSON() as { carreiraId: number };
+      const routeInfo = state.routes.find((entry) => entry.id === payload.carreiraId);
       const title: TituloDTO = {
-        ID: nextTitleId(state),
+        id: nextTitleId(state),
         tipo: 'BILHETE_INDIVIDUAL',
         estado: 'ATIVO',
         valido: true,
@@ -178,7 +178,7 @@ export async function mockApi(page: Page, state: ApiState) {
     if (key === 'POST /api/tickets/trip-pack') {
       const payload = request.postDataJSON() as { numViagens: number; zonaIDs: number[] };
       const title: TituloDTO = {
-        ID: nextTitleId(state),
+        id: nextTitleId(state),
         tipo: 'PACOTE_VIAGENS',
         estado: 'ATIVO',
         valido: true,

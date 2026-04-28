@@ -28,7 +28,13 @@ import com.projeto_EA.AirBus.repositories.UserRepository;
 import com.projeto_EA.AirBus.security.JwtUtil;
 
 import jakarta.annotation.PostConstruct;
+import com.projeto_EA.AirBus.security.UserDetailsAdapter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +68,7 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public AuthResponseDTO register(RegisterRequestDTO request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email já registado!");
@@ -73,7 +80,7 @@ public class AuthService {
         user.setDataNascimento(request.getDataNascimento());
         user.setTelefone(request.getTelefone());
         userRepository.save(user);
-        String token = jwtUtil.generateToken(user);
+        String token = jwtUtil.generateToken(new UserDetailsAdapter(user));
         return new AuthResponseDTO(token, new UserDTO(user));
     }
 
@@ -83,7 +90,7 @@ public class AuthService {
         );
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado!"));
-        String token = jwtUtil.generateToken(user);
+        String token = jwtUtil.generateToken(new UserDetailsAdapter(user));
         return new AuthResponseDTO(token, new UserDTO(user));
     }
 
@@ -119,7 +126,7 @@ public class AuthService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseGet(() -> createGoogleUser(email, name));
 
-        return new AuthResponseDTO(jwtUtil.generateToken(user), new UserDTO(user));
+        return new AuthResponseDTO(jwtUtil.generateToken(new UserDetailsAdapter(user)), new UserDTO(user));
     }
 
     private UserEntity createGoogleUser(String email, String name) {

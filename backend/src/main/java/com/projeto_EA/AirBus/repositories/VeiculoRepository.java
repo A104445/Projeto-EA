@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface VeiculoRepository extends JpaRepository<VeiculoEntity, Long> {
 
-    List<VeiculoEntity> findByCarreiraIDOrderByID(Long carreiraID);
+    List<VeiculoEntity> findByCarreiraIdOrderById(Long carreiraId);
 }

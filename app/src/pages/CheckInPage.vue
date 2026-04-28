@@ -40,13 +40,13 @@
         </div>
         <q-list v-else separator class="select-list q-mb-md">
           <q-item
-            v-for="c in carreiras" :key="c.ID"
+            v-for="c in carreiras" :key="c.id"
             clickable
-            :class="{ 'item-selected': selectedCarreiraID === c.ID }"
-            @click="selectedCarreiraID = c.ID"
+            :class="{ 'item-selected': selectedCarreiraID === c.id }"
+            @click="selectedCarreiraID = c.id"
           >
             <q-item-section avatar>
-              <q-icon name="directions_bus" :color="selectedCarreiraID === c.ID ? 'blue-7' : 'grey-5'" />
+              <q-icon name="directions_bus" :color="selectedCarreiraID === c.id ? 'blue-7' : 'grey-5'" />
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
@@ -55,7 +55,7 @@
               </q-item-label>
             </q-item-section>
             <q-item-section side>
-              <q-icon v-if="selectedCarreiraID === c.ID" name="check_circle" color="blue-7" />
+              <q-icon v-if="selectedCarreiraID === c.id" name="check_circle" color="blue-7" />
             </q-item-section>
           </q-item>
         </q-list>
@@ -69,13 +69,13 @@
         </div>
         <q-list v-else separator class="select-list q-mb-lg">
           <q-item
-            v-for="t in titulosDisponiveis" :key="t.ID"
+            v-for="t in titulosDisponiveis" :key="t.id"
             clickable
-            :class="{ 'item-selected': selectedTituloID === t.ID }"
-            @click="selectedTituloID = t.ID"
+            :class="{ 'item-selected': selectedTituloID === t.id }"
+            @click="selectedTituloID = t.id"
           >
             <q-item-section avatar>
-              <q-icon :name="tipoIcon(t.tipo)" :color="selectedTituloID === t.ID ? 'blue-7' : 'grey-5'" />
+              <q-icon :name="tipoIcon(t.tipo)" :color="selectedTituloID === t.id ? 'blue-7' : 'grey-5'" />
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ t.tipo?.replace(/_/g, ' ') }}</q-item-label>
@@ -84,7 +84,7 @@
               </div>
             </q-item-section>
             <q-item-section side>
-              <q-icon v-if="selectedTituloID === t.ID" name="check_circle" color="blue-7" />
+              <q-icon v-if="selectedTituloID === t.id" name="check_circle" color="blue-7" />
             </q-item-section>
           </q-item>
         </q-list>
@@ -160,7 +160,7 @@ async function onQrScanned(code: string) {
   qrLoading.value = true;
   try {
     paragem.value = await stopsService.getByQr(code);
-    await loadCarreiras(paragem.value.ID);
+    await loadCarreiras(paragem.value.id);
     step.value = 2;
   } catch {
     qrError.value = `Paragem não reconhecida: "${code}"`;
@@ -173,7 +173,7 @@ async function loadCarreiras(paragemID: number) {
     carreiras.value = await stopsService.getRoutes(paragemID);
     // pré-selecionar a carreira com horário mais próximo (primeira da lista)
     if (carreiras.value.length > 0) {
-      selectedCarreiraID.value = carreiras.value[0]!.ID;
+      selectedCarreiraID.value = carreiras.value[0]!.id;
     }
   } finally { carreirasLoading.value = false; }
 }
@@ -183,7 +183,7 @@ async function confirmarCheckIn() {
   submitLoading.value = true;
   try {
     viagem.value = await tripsService.checkIn(
-      paragem.value!.ID,
+      paragem.value!.id,
       selectedCarreiraID.value!,
       selectedTituloID.value!,
     );

@@ -3,18 +3,18 @@ package com.projeto_EA.AirBus.models.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "horario")
-@Getter @Setter @NoArgsConstructor
+@Getter @NoArgsConstructor
 public class HorarioEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "carreira_id")
@@ -27,7 +27,7 @@ public class HorarioEntity {
     @Column(nullable = false)
     private LocalTime horaChegada;
 
-    // 1=Segunda, 2=Terça, ..., 5=Sexta, 6=Sábado, 7=Domingo
+    // 1=segunda, 2=terça, ..., 5=sexta, 6=sábado, 7=domingo
     @Column(nullable = false)
     private int diaSemana;
 
@@ -36,5 +36,17 @@ public class HorarioEntity {
         this.paragem = paragem;
         this.horaChegada = horaChegada;
         this.diaSemana = diaSemana;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof HorarioEntity other)) return false;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

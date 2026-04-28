@@ -10,18 +10,21 @@ import java.util.Set;
 
 @Entity
 @DiscriminatorValue("BILHETE_INDIVIDUAL")
-@Getter @Setter @NoArgsConstructor
+@Getter @NoArgsConstructor
 public class BilheteIndividualEntity extends TituloTransporteEntity {
 
     @Column(name = "usado")
     private boolean usado = false;
 
-    @Column(name = "data_fim_bilhete")
+    @Setter @Column(name = "data_fim_bilhete")
     private LocalDate dataFim;
 
-    @ManyToOne
+    @Setter @ManyToOne
     @JoinColumn(name = "carreira_id")
     private CarreiraEntity carreira;
+
+    @Override
+    public String getTipo() { return "BILHETE_INDIVIDUAL"; }
 
     @Override
     public boolean isValid() {
@@ -30,7 +33,7 @@ public class BilheteIndividualEntity extends TituloTransporteEntity {
 
     @Override
     public void validarParaCheckIn(CarreiraEntity carreira, ParagemEntity paragem) {
-        if (!this.carreira.getID().equals(carreira.getID())) {
+        if (!this.carreira.getId().equals(carreira.getId())) {
             throw new IllegalStateException("Bilhete não é válido para esta carreira!");
         }
         // zona já está coberta pela carreira — não é necessário verificar

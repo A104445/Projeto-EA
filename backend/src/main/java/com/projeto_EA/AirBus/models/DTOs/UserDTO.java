@@ -9,14 +9,14 @@ import java.time.LocalDate;
 
 @Getter @Setter @NoArgsConstructor
 public class UserDTO {
-    private Long ID;
+    private Long id;
     private String nome;
     private String email;
     private LocalDate dataNascimento;
     private String telefone;
 
     public UserDTO(UserEntity u) {
-        this.ID = u.getID();
+        this.id = u.getId();
         this.nome = u.getNome();
         this.email = u.getEmail();
         this.dataNascimento = u.getDataNascimento();

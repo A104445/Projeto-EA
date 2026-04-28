@@ -12,17 +12,17 @@ import com.projeto_EA.AirBus.models.entities.HorarioEntity;
 @Repository
 public interface HorarioRepository extends JpaRepository<HorarioEntity, Long> {
 
-    List<HorarioEntity> findByCarreiraID(Long carreiraID);
+    List<HorarioEntity> findByCarreiraId(Long carreiraId);
 
-    List<HorarioEntity> findByParagemID(Long paragemID);
+    List<HorarioEntity> findByParagemId(Long paragoemId);
 
-    List<HorarioEntity> findByCarreiraIDAndParagemID(Long carreiraID, Long paragemID);
+    List<HorarioEntity> findByCarreiraIdAndParagemId(Long carreiraId, Long paragoemId);
 
-    List<HorarioEntity> findByCarreiraIDAndDiaSemana(Long carreiraID, int diaSemana);
+    List<HorarioEntity> findByCarreiraIdAndDiaSemana(Long carreiraId, int diaSemana);
 
     @Query("""
         SELECT h FROM HorarioEntity h
-        WHERE h.paragem.ID = :paragemId
+        WHERE h.paragem.id = :paragemId
           AND h.diaSemana  = :diaSemana
         ORDER BY h.horaChegada ASC
         """)
@@ -31,6 +31,6 @@ public interface HorarioRepository extends JpaRepository<HorarioEntity, Long> {
         @Param("diaSemana") int diaSemana
     );
 
-    List<HorarioEntity> findByCarreiraIDAndParagemIDAndDiaSemanaOrderByHoraChegada(
-        Long carreiraID, Long paragemID, int diaSemana);
+    List<HorarioEntity> findByCarreiraIdAndParagemIdAndDiaSemanaOrderByHoraChegada(
+        Long carreiraId, Long paragoemId, int diaSemana);
 }

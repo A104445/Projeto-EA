@@ -3,16 +3,19 @@ package com.projeto_EA.AirBus.models.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "veiculo")
-@Getter @Setter @NoArgsConstructor
+@Getter @NoArgsConstructor
 public class VeiculoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
+
+    @Version
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private Long version = 0L;
 
     @Column(nullable = false, unique = true)
     private String matricula;
@@ -39,5 +42,17 @@ public class VeiculoEntity {
         this.matricula = matricula;
         this.capacidade = capacidade;
         this.carreira = carreira;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VeiculoEntity other)) return false;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

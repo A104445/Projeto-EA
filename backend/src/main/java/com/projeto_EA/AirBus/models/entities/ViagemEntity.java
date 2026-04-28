@@ -1,5 +1,6 @@
 package com.projeto_EA.AirBus.models.entities;
 
+import com.projeto_EA.AirBus.models.enums.EstadoViagem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,48 +10,59 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "viagem")
-@Getter @Setter @NoArgsConstructor
+@Getter @NoArgsConstructor
 public class ViagemEntity {
-
-    public static final String EM_CURSO  = "EM_CURSO";
-    public static final String CONCLUIDA = "CONCLUIDA";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
 
-    @ManyToOne(optional = false)
+    @Setter @ManyToOne(optional = false)
     @JoinColumn(name = "utente_id")
     private UserEntity utente;
 
-    @ManyToOne(optional = false)
+    @Setter @ManyToOne(optional = false)
     @JoinColumn(name = "titulo_id")
     private TituloTransporteEntity titulo;
 
-    @ManyToOne(optional = false)
+    @Setter @ManyToOne(optional = false)
     @JoinColumn(name = "carreira_id")
     private CarreiraEntity carreira;
 
-    @ManyToOne
+    @Setter @ManyToOne
     @JoinColumn(name = "veiculo_id")
     private VeiculoEntity veiculo;
 
-    @ManyToOne(optional = false)
+    @Setter @ManyToOne(optional = false)
     @JoinColumn(name = "origem_id")
     private ParagemEntity origem;
 
-    @ManyToOne
+    @Setter @ManyToOne
     @JoinColumn(name = "destino_id")
     private ParagemEntity destino;
 
-    @Column(nullable = false)
+    @Setter @Column(nullable = false)
     private LocalDateTime dataHoraEntrada;
 
+    @Setter
     private LocalDateTime dataHoraSaida;
 
+    @Setter @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String estado = EM_CURSO;
+    private EstadoViagem estado = EstadoViagem.EM_CURSO;
 
-    @Column(nullable = false)
+    @Setter @Column(nullable = false)
     private boolean irregular = false;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ViagemEntity other)) return false;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -2,6 +2,7 @@ package com.projeto_EA.AirBus.services;
 
 import com.projeto_EA.AirBus.models.DTOs.*;
 import com.projeto_EA.AirBus.models.entities.*;
+import com.projeto_EA.AirBus.models.enums.EstadoGeral;
 import com.projeto_EA.AirBus.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,15 +24,15 @@ public class TituloService {
 
     @Transactional(readOnly = true)
     public List<TituloDTO> getMeusTitulos(Long userID) {
-        return tituloRepository.findByUtenteID(userID).stream()
-                .map(TituloDTO::new)
+        return tituloRepository.findByUtenteId(userID).stream()
+                .map(TituloDTO::from)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<TituloDTO> getMeusTitulosAtivos(Long userID) {
-        return tituloRepository.findByUtenteIDAndEstado(userID, "ATIVO").stream()
-                .map(TituloDTO::new)
+        return tituloRepository.findByUtenteIdAndEstado(userID, EstadoGeral.ATIVO).stream()
+                .map(TituloDTO::from)
                 .collect(Collectors.toList());
     }
 
@@ -44,9 +45,9 @@ public class TituloService {
         passe.setUtente(user);
         passe.setDataInicio(LocalDate.now());
         passe.setDataFim(LocalDate.now().plusYears(1));
-        passe.setZonas(zonas);
+        passe.definirZonas(zonas);
 
-        return new TituloDTO(tituloRepository.save(passe));
+        return TituloDTO.from(tituloRepository.save(passe));
     }
 
     @Transactional
@@ -64,9 +65,9 @@ public class TituloService {
         bilhete.setUtente(user);
         bilhete.setCarreira(carreira);
         bilhete.setDataFim(LocalDate.now().plusDays(1));
-        bilhete.setZonas(zonas);
+        bilhete.definirZonas(zonas);
 
-        return new TituloDTO(tituloRepository.save(bilhete));
+        return TituloDTO.from(tituloRepository.save(bilhete));
     }
 
     @Transactional
@@ -78,9 +79,9 @@ public class TituloService {
         pacote.setUtente(user);
         pacote.setNumViagensTotais(dto.getNumViagens());
         pacote.setSaldoRestante(dto.getNumViagens());
-        pacote.setZonas(zonas);
+        pacote.definirZonas(zonas);
 
-        return new TituloDTO(tituloRepository.save(pacote));
+        return TituloDTO.from(tituloRepository.save(pacote));
     }
 
     private UserEntity getUtente(Long userID) {

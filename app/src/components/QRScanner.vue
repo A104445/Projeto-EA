@@ -48,7 +48,7 @@ onMounted(async () => {
   scanner = new QrScanner(
       videoRef.value,
       (result) => {
-        stopScanner();
+        void stopScanner();
         emit('scan', result.data);
       },
       {
@@ -63,9 +63,11 @@ onMounted(async () => {
 onBeforeUnmount(() => stopScanner());
 
 function stopScanner() {
-  scanner?.stop();
-  scanner?.destroy();
+  if (!scanner) return;
+  const s = scanner;
   scanner = null;
+  s.stop();
+  s.destroy();
 }
 
 function submitManual() {

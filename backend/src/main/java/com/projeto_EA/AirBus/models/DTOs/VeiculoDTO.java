@@ -7,13 +7,13 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor
 public class VeiculoDTO {
-    private Long ID;
+    private Long id;
     private String matricula;
     private int capacidade;
     private int ocupacaoAtual;
 
     public VeiculoDTO(VeiculoEntity v) {
-        this.ID = v.getID();
+        this.id = v.getId();
         this.matricula = v.getMatricula();
         this.capacidade = v.getCapacidade();
         this.ocupacaoAtual = v.getOcupacaoAtual();

@@ -8,7 +8,7 @@ export interface Meta {
 }
 
 export interface User {
-  ID: number;
+  id: number;
   nome: string;
   email: string;
   dataNascimento?: string;
@@ -16,25 +16,25 @@ export interface User {
 }
 
 export interface ZonaDTO {
-  ID: number;
+  id: number;
   nome: string;
 }
 
 export interface ParagemDTO {
-  ID: number;
+  id: number;
   nome: string;
   qr: string;
 }
 
 export interface VeiculoDTO {
-  ID: number;
+  id: number;
   matricula: string;
   capacidade: number;
   ocupacaoAtual: number;
 }
 
 export interface CarreiraDTO {
-  ID: number;
+  id: number;
   num: string;
   nome: string;
   paragens?: ParagemDTO[];
@@ -43,16 +43,16 @@ export interface CarreiraDTO {
 }
 
 export interface HorarioDTO {
-  ID: number;
-  carreiraID: number;
-  paragemID: number;
+  id: number;
+  carreiraId: number;
+  paragemId: number;
   paragemNome: string;
   horaChegada: string; // "HH:mm:ss"
   diaSemana: number;
 }
 
 export interface TituloDTO {
-  ID: number;
+  id: number;
   tipo: string;
   estado: string;
   valido: boolean;
@@ -62,7 +62,7 @@ export interface TituloDTO {
 }
 
 export interface ViagemDTO {
-  ID: number;
+  id: number;
   estado: string;
   dataHoraEntrada: string;
   dataHoraSaida?: string;

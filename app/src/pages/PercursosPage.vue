@@ -52,7 +52,7 @@
       </div>
 
       <template v-else>
-        <div v-for="v in filtered" :key="v.ID" class="trip-card">
+        <div v-for="v in filtered" :key="v.id" class="trip-card">
           <div class="trip-icon-wrap" :class="iconClass(v)">
             <q-icon :name="tripIconFromNome(v.carreiraNome)" size="20px" color="white" />
           </div>

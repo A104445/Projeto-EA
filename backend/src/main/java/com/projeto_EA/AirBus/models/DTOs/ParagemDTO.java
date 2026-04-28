@@ -10,16 +10,16 @@ import java.util.stream.Collectors;
 
 @Getter @Setter @NoArgsConstructor
 public class ParagemDTO {
-    private Long ID;
+    private Long id;
     private String nome;
     private String estado;
     private String qr;
     private Set<String> zonas;
 
     public ParagemDTO(ParagemEntity p) {
-        this.ID = p.getID();
+        this.id = p.getId();
         this.nome = p.getNome();
-        this.estado = p.getEstado();
+        this.estado = p.getEstado().name();
         this.qr = p.getQr();
         this.zonas = p.getZonas().stream()
                 .map(z -> z.getNome())

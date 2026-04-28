@@ -8,13 +8,13 @@
   </q-banner>
   <div v-else class="zonas-chips">
     <button
-      v-for="z in zonas" :key="z.ID"
+      v-for="z in zonas" :key="z.id"
       class="zona-chip"
-      :class="{ 'zona-chip-selected': selectedIds.includes(z.ID) }"
-      :style="selectedIds.includes(z.ID)
+      :class="{ 'zona-chip-selected': selectedIds.includes(z.id) }"
+      :style="selectedIds.includes(z.id)
         ? { background: zonaColor(z.nome), borderColor: zonaColor(z.nome) }
         : { borderColor: zonaColor(z.nome), color: zonaColor(z.nome) }"
-      @click="$emit('toggle', z.ID)"
+      @click="$emit('toggle', z.id)"
     >{{ zonaBadgeLabel(z.nome) }}</button>
   </div>
 </template>

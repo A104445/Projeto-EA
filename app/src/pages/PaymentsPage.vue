@@ -21,7 +21,7 @@
       </div>
 
       <template v-else>
-        <div v-for="t in titulos" :key="t.ID" class="titulo-card">
+        <div v-for="t in titulos" :key="t.id" class="titulo-card">
           <div class="titulo-card-left">
             <q-icon :name="tipoIcon(t.tipo)" size="22px" :color="tipoColor(t.tipo)" />
           </div>
@@ -138,20 +138,20 @@
             </q-input>
             <q-list separator class="carreiras-list">
               <q-item
-                v-for="c in carreirasFiltradas" :key="c.ID"
+                v-for="c in carreirasFiltradas" :key="c.id"
                 clickable
-                :class="{ 'carreira-selected': bilheteForm.carreiraID === c.ID }"
-                @click="bilheteForm.carreiraID = c.ID"
+                :class="{ 'carreira-selected': bilheteForm.carreiraID === c.id }"
+                @click="bilheteForm.carreiraID = c.id"
               >
                 <q-item-section avatar>
-                  <q-icon name="directions_bus" :color="bilheteForm.carreiraID === c.ID ? 'blue-7' : 'grey-5'" />
+                  <q-icon name="directions_bus" :color="bilheteForm.carreiraID === c.id ? 'blue-7' : 'grey-5'" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
                   <q-item-label caption>{{ c.paragens?.length ?? 0 }} paragens</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-icon v-if="bilheteForm.carreiraID === c.ID" name="check_circle" color="blue-7" />
+                  <q-icon v-if="bilheteForm.carreiraID === c.id" name="check_circle" color="blue-7" />
                 </q-item-section>
               </q-item>
               <q-item v-if="carreirasFiltradas.length === 0">

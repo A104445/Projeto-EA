@@ -3,6 +3,7 @@ package com.projeto_EA.AirBus.controllers;
 import com.projeto_EA.AirBus.models.DTOs.NotificacaoDTO;
 import com.projeto_EA.AirBus.models.entities.UserEntity;
 import com.projeto_EA.AirBus.routes.Routes;
+import com.projeto_EA.AirBus.security.UserDetailsAdapter;
 import com.projeto_EA.AirBus.services.NotificacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class NotificacaoController {
     private final NotificacaoService notificacaoService;
 
     @GetMapping
-    public ResponseEntity<List<NotificacaoDTO>> getNotificacoes(@AuthenticationPrincipal UserEntity user) {
-        return ResponseEntity.ok(notificacaoService.getNotificacoes(user.getID()));
+    public ResponseEntity<List<NotificacaoDTO>> getNotificacoes(@AuthenticationPrincipal UserDetailsAdapter principal) {
+        return ResponseEntity.ok(notificacaoService.getNotificacoes(principal.getUser().getId()));
     }
 }

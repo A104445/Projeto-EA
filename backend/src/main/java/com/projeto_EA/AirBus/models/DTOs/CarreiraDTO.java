@@ -10,19 +10,19 @@ import java.util.stream.Collectors;
 
 @Getter @Setter @NoArgsConstructor
 public class CarreiraDTO {
-    private Long ID;
+    private Long id;
     private String num;
     private String nome;
     private String estado;
     private List<ParagemDTO> paragens;
-    private String proximaChegada; // "HH:mm" — preenchido apenas quando ordenado por horário
-    private VeiculoDTO veiculoProximo; // preenchido apenas no contexto de check-in
+    private String proximaChegada;
+    private VeiculoDTO veiculoProximo;
 
     public CarreiraDTO(CarreiraEntity c) {
-        this.ID = c.getID();
+        this.id = c.getId();
         this.num = c.getNum();
         this.nome = c.getNome();
-        this.estado = c.getEstado();
+        this.estado = c.getEstado().name();
         this.paragens = c.getParagens().stream()
                 .map(ParagemDTO::new)
                 .collect(Collectors.toList());

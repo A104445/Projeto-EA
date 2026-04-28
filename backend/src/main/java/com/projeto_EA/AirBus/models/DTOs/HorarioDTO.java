@@ -9,21 +9,21 @@ import java.time.LocalTime;
 
 @Getter @Setter @NoArgsConstructor
 public class HorarioDTO {
-    private Long ID;
-    private Long carreiraID;
+    private Long id;
+    private Long carreiraId;
     private String carreiraNum;
     private String carreiraNome;
-    private Long paragemID;
+    private Long paragemId;
     private String paragemNome;
     private LocalTime horaChegada;
     private int diaSemana;
 
     public HorarioDTO(HorarioEntity h) {
-        this.ID = h.getID();
-        this.carreiraID = h.getCarreira().getID();
+        this.id = h.getId();
+        this.carreiraId = h.getCarreira().getId();
         this.carreiraNum = h.getCarreira().getNum();
         this.carreiraNome = h.getCarreira().getNome();
-        this.paragemID = h.getParagem().getID();
+        this.paragemId = h.getParagem().getId();
         this.paragemNome = h.getParagem().getNome();
         this.horaChegada = h.getHoraChegada();
         this.diaSemana = h.getDiaSemana();

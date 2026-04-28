@@ -1,9 +1,10 @@
 package com.projeto_EA.AirBus.models.entities;
 
+import com.projeto_EA.AirBus.models.enums.EstadoGeral;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,18 +13,19 @@ import java.util.Set;
 
 @Entity
 @Table(name = "paragem")
-@Getter @Setter @NoArgsConstructor
+@Getter @NoArgsConstructor
 public class ParagemEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
 
     @Column(nullable = false)
     private String nome;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String estado = "ATIVO";
+    private EstadoGeral estado = EstadoGeral.ATIVO;
 
     @Column(nullable = false, unique = true)
     private String qr;
@@ -42,5 +44,17 @@ public class ParagemEntity {
     public ParagemEntity(String nome, String qr) {
         this.nome = nome;
         this.qr = qr;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ParagemEntity other)) return false;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

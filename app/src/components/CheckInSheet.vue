@@ -13,7 +13,7 @@
       <!-- passo 1: QR scan -->
       <q-card-section v-if="step === 1" class="sheet-body">
         <p class="sheet-desc">Aponta a câmara ao QR code da paragem de entrada.</p>
-        <QrScanner @scan="onQrScanned" />
+        <QrScanner v-if="modelValue" @scan="onQrScanned" />
         <q-banner v-if="qrError" rounded dense class="bg-red-1 text-red-8 q-mt-sm">{{ qrError }}</q-banner>
         <div v-if="qrLoading" class="text-center q-mt-sm">
           <q-spinner color="blue-6" size="28px" />
@@ -34,11 +34,11 @@
           Nenhuma carreira passa nesta paragem...
         </div>
         <q-list v-else separator class="select-list q-mb-md">
-          <q-item v-for="c in carreiras" :key="c.ID" clickable
-                  :class="{ 'item-selected': selectedCarreiraID === c.ID }"
-                  @click="selectedCarreiraID = c.ID">
+          <q-item v-for="c in carreiras" :key="c.id" clickable
+                  :class="{ 'item-selected': selectedCarreiraID === c.id }"
+                  @click="selectedCarreiraID = c.id">
             <q-item-section avatar>
-              <q-icon name="directions_bus" :color="selectedCarreiraID === c.ID ? 'blue-7' : 'grey-5'" />
+              <q-icon name="directions_bus" :color="selectedCarreiraID === c.id ? 'blue-7' : 'grey-5'" />
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
@@ -54,7 +54,7 @@
               </div>
             </q-item-section>
             <q-item-section side>
-              <q-icon v-if="selectedCarreiraID === c.ID" name="check_circle" color="blue-7" />
+              <q-icon v-if="selectedCarreiraID === c.id" name="check_circle" color="blue-7" />
             </q-item-section>
           </q-item>
         </q-list>
@@ -65,11 +65,11 @@
           Não tens títulos válidos!
         </div>
         <q-list v-else separator class="select-list q-mb-md">
-          <q-item v-for="t in titulosDisponiveis" :key="t.ID" clickable
-                  :class="{ 'item-selected': selectedTituloID === t.ID }"
-                  @click="selectedTituloID = t.ID">
+          <q-item v-for="t in titulosDisponiveis" :key="t.id" clickable
+                  :class="{ 'item-selected': selectedTituloID === t.id }"
+                  @click="selectedTituloID = t.id">
             <q-item-section avatar>
-              <q-icon :name="tipoIcon(t.tipo)" :color="selectedTituloID === t.ID ? 'blue-7' : 'grey-5'" />
+              <q-icon :name="tipoIcon(t.tipo)" :color="selectedTituloID === t.id ? 'blue-7' : 'grey-5'" />
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ t.tipo?.replace(/_/g, ' ') }}</q-item-label>
@@ -78,7 +78,7 @@
               </div>
             </q-item-section>
             <q-item-section side>
-              <q-icon v-if="selectedTituloID === t.ID" name="check_circle" color="blue-7" />
+              <q-icon v-if="selectedTituloID === t.id" name="check_circle" color="blue-7" />
             </q-item-section>
           </q-item>
         </q-list>
@@ -167,8 +167,8 @@ async function onQrScanned(code: string) {
   try {
     paragem.value = await stopsService.getByQr(code);
     carreirasLoading.value = true;
-    carreiras.value = await stopsService.getRoutes(paragem.value.ID);
-    if (carreiras.value.length > 0) selectedCarreiraID.value = carreiras.value[0]!.ID;
+    carreiras.value = await stopsService.getRoutes(paragem.value.id);
+    if (carreiras.value.length > 0) selectedCarreiraID.value = carreiras.value[0]!.id;
     step.value = 2;
   } catch {
     qrError.value = `Paragem não reconhecida: "${code}"`;
@@ -182,12 +182,12 @@ async function confirmarCheckIn() {
   submitError.value   = '';
   submitLoading.value = true;
   try {
-    const carreira = carreiras.value.find((c) => c.ID === selectedCarreiraID.value);
+    const carreira = carreiras.value.find((c) => c.id === selectedCarreiraID.value);
     viagem.value = await tripsService.checkIn(
-      paragem.value!.ID,
+      paragem.value!.id,
       selectedCarreiraID.value!,
       selectedTituloID.value!,
-      carreira?.veiculoProximo?.ID,
+      carreira?.veiculoProximo?.id,
     );
     step.value = 3;
     emit('done', viagem.value);

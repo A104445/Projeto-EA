@@ -104,7 +104,7 @@
         <p>Sem viagens recentes</p>
       </div>
       <template v-else>
-        <q-item v-for="v in recentViagens" :key="v.ID" clickable class="trip-item"
+        <q-item v-for="v in recentViagens" :key="v.id" clickable class="trip-item"
                 @click="$router.push('/app/percursos')">
           <q-item-section avatar>
             <div class="trip-icon-wrap">
@@ -184,8 +184,8 @@
             <q-spinner color="blue-6" size="28px" />
           </div>
           <q-list v-else separator class="select-list">
-            <q-item v-for="c in carreirasFiltradas" :key="c.ID" clickable
-                    @click="selectCarreiraHorario(c.ID, c.num + ' — ' + c.nome)">
+            <q-item v-for="c in carreirasFiltradas" :key="c.id" clickable
+                    @click="selectCarreiraHorario(c.id, c.num + ' — ' + c.nome)">
               <q-item-section avatar>
                 <q-icon name="directions_bus" color="grey-5" />
               </q-item-section>
@@ -311,8 +311,8 @@ const horariosByParagem = computed(() => {
   const map = new Map<number, { paragemNome: string; times: string[] }>();
   for (const h of horarios.value) {
     const t = h.horaChegada.slice(0, 5); // "HH:mm"
-    if (!map.has(h.paragemID)) map.set(h.paragemID, { paragemNome: h.paragemNome, times: [] });
-    map.get(h.paragemID)!.times.push(t);
+    if (!map.has(h.paragemId)) map.set(h.paragemId, { paragemNome: h.paragemNome, times: [] });
+    map.get(h.paragemId)!.times.push(t);
   }
   return Array.from(map.entries()).map(([paragemID, v]) => ({
     paragemID,
@@ -369,7 +369,7 @@ async function confirmarCheckout() {
   checkoutError.value   = '';
   checkoutLoading.value = true;
   try {
-    const result = await tripsService.checkOut(viagemAtiva.value.ID, checkoutParagem.value.ID);
+    const result = await tripsService.checkOut(viagemAtiva.value.id, checkoutParagem.value.id);
     resultIrregular.value = result.irregular ?? false;
     viagemAtiva.value     = null;
     checkoutDialog.value  = false;

@@ -9,7 +9,7 @@ import type {
 } from '../../src/components/models';
 
 export const defaultUser: User = {
-  ID: 1,
+  id: 1,
   nome: 'Joao Silva',
   email: 'joao@example.com',
   telefone: '912345678',
@@ -18,7 +18,7 @@ export const defaultUser: User = {
 
 export const defaultActiveTitles: TituloDTO[] = [
   {
-    ID: 101,
+    id:101,
     tipo: 'PASSE_ANUAL',
     estado: 'ATIVO',
     valido: true,
@@ -30,7 +30,7 @@ export const defaultActiveTitles: TituloDTO[] = [
 export const defaultAllTitles: TituloDTO[] = [
   ...defaultActiveTitles,
   {
-    ID: 102,
+    id:102,
     tipo: 'PACOTE_VIAGENS',
     estado: 'ATIVO',
     valido: true,
@@ -40,21 +40,21 @@ export const defaultAllTitles: TituloDTO[] = [
 ];
 
 export const defaultZones: ZonaDTO[] = [
-  { ID: 1, nome: 'Zona A' },
-  { ID: 2, nome: 'Zona B' },
-  { ID: 3, nome: 'Zona C' },
+  { id: 1, nome: 'Zona A' },
+  { id: 2, nome: 'Zona B' },
+  { id: 3, nome: 'Zona C' },
 ];
 
 export const defaultRoutes: CarreiraDTO[] = [
   {
-    ID: 201,
+    id:201,
     num: '101',
     nome: 'Aeroporto',
     paragens: [],
     proximaChegada: '10:15',
   },
   {
-    ID: 202,
+    id:202,
     num: '202',
     nome: 'Universidade',
     paragens: [],
@@ -64,17 +64,17 @@ export const defaultRoutes: CarreiraDTO[] = [
 
 export const defaultSchedulesByRoute: Record<number, HorarioDTO[]> = {
   201: [
-    { ID: 1, carreiraID: 201, paragemID: 1, paragemNome: 'Terminal', horaChegada: '10:15:00', diaSemana: 6 },
-    { ID: 2, carreiraID: 201, paragemID: 2, paragemNome: 'Campus', horaChegada: '10:40:00', diaSemana: 6 },
+    { id: 1, carreiraId: 201, paragemId: 1, paragemNome: 'Terminal', horaChegada: '10:15:00', diaSemana: 6 },
+    { id: 2, carreiraId: 201, paragemId: 2, paragemNome: 'Campus', horaChegada: '10:40:00', diaSemana: 6 },
   ],
   202: [
-    { ID: 3, carreiraID: 202, paragemID: 3, paragemNome: 'Centro', horaChegada: '11:00:00', diaSemana: 6 },
+    { id: 3, carreiraId: 202, paragemId: 3, paragemNome: 'Centro', horaChegada: '11:00:00', diaSemana: 6 },
   ],
 };
 
 export const defaultHistoryTrips: ViagemDTO[] = [
   {
-    ID: 301,
+    id:301,
     estado: 'CONCLUIDA',
     dataHoraEntrada: '2026-04-24T08:15:00',
     dataHoraSaida: '2026-04-24T08:45:00',
@@ -85,7 +85,7 @@ export const defaultHistoryTrips: ViagemDTO[] = [
     irregular: false,
   },
   {
-    ID: 302,
+    id:302,
     estado: 'CONCLUIDA',
     dataHoraEntrada: '2026-04-23T18:10:00',
     dataHoraSaida: '2026-04-23T18:50:00',

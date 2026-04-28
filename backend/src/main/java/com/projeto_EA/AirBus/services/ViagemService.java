@@ -2,6 +2,7 @@ package com.projeto_EA.AirBus.services;
 
 import com.projeto_EA.AirBus.models.DTOs.*;
 import com.projeto_EA.AirBus.models.entities.*;
+import com.projeto_EA.AirBus.models.enums.EstadoViagem;
 import com.projeto_EA.AirBus.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class ViagemService {
 
     @Transactional
     public ViagemDTO checkIn(Long userID, CheckInRequestDTO dto) {
-        if (viagemRepository.findByUtenteIDAndEstado(userID, ViagemEntity.EM_CURSO).isPresent()) {
+        if (viagemRepository.findByUtenteIdAndEstado(userID, EstadoViagem.EM_CURSO).isPresent()) {
             throw new IllegalStateException("Já existe uma viagem em curso! Faça check-out primeiro...");
         }
 
@@ -44,7 +45,7 @@ public class ViagemService {
         TituloTransporteEntity titulo = tituloRepository.findById(dto.getTituloID())
                 .orElseThrow(() -> new IllegalArgumentException("Título não encontrado!"));
 
-        if (!titulo.getUtente().getID().equals(userID)) {
+        if (!titulo.getUtente().getId().equals(userID)) {
             throw new IllegalArgumentException("Título não pertence ao utilizador!");
         }
 
@@ -78,11 +79,11 @@ public class ViagemService {
         ViagemEntity viagem = viagemRepository.findById(viagemID)
                 .orElseThrow(() -> new IllegalArgumentException("Viagem não encontrada!"));
 
-        if (!viagem.getUtente().getID().equals(userID)) {
+        if (!viagem.getUtente().getId().equals(userID)) {
             throw new IllegalArgumentException("Viagem não pertence ao utilizador!");
         }
 
-        if (!ViagemEntity.EM_CURSO.equals(viagem.getEstado())) {
+        if (EstadoViagem.EM_CURSO != viagem.getEstado()) {
             throw new IllegalStateException("Esta viagem já foi concluída!");
         }
 
@@ -94,7 +95,7 @@ public class ViagemService {
         TituloTransporteEntity titulo = viagem.getTitulo();
         viagem.setDestino(destino);
         viagem.setDataHoraSaida(LocalDateTime.now());
-        viagem.setEstado(ViagemEntity.CONCLUIDA);
+        viagem.setEstado(EstadoViagem.CONCLUIDA);
         viagem.setIrregular(titulo.isIrregular(zonasPercorridas));
 
         titulo.aoFinalizarViagem();
@@ -108,27 +109,29 @@ public class ViagemService {
         return new ViagemDTO(viagemRepository.save(viagem));
     }
 
+    @Transactional(readOnly = true)
     public Optional<ViagemDTO> getViagemAtiva(Long userID) {
-        return viagemRepository.findByUtenteIDAndEstado(userID, ViagemEntity.EM_CURSO)
+        return viagemRepository.findByUtenteIdAndEstado(userID, EstadoViagem.EM_CURSO)
                 .map(ViagemDTO::new);
     }
 
+    @Transactional(readOnly = true)
     public List<ViagemDTO> getHistorico(Long userID) {
-        return viagemRepository.findByUtenteIDOrderByDataHoraEntradaDesc(userID).stream()
+        return viagemRepository.findByUtenteIdOrderByDataHoraEntradaDesc(userID).stream()
                 .map(ViagemDTO::new)
                 .collect(Collectors.toList());
     }
 
     private VeiculoEntity findNextVeiculo(CarreiraEntity carreira, ParagemEntity paragem) {
-        List<VeiculoEntity> veiculos = veiculoRepository.findByCarreiraIDOrderByID(carreira.getID());
+        List<VeiculoEntity> veiculos = veiculoRepository.findByCarreiraIdOrderById(carreira.getId());
         if (veiculos.isEmpty()) return null;
 
-        int diaSemana = LocalDate.now().getDayOfWeek().getValue(); // 1=Seg, 7=Dom
+        int diaSemana = LocalDate.now().getDayOfWeek().getValue();
         LocalTime agora = LocalTime.now();
 
         List<HorarioEntity> horarios = horarioRepository
-                .findByCarreiraIDAndParagemIDAndDiaSemanaOrderByHoraChegada(
-                        carreira.getID(), paragem.getID(), diaSemana);
+                .findByCarreiraIdAndParagemIdAndDiaSemanaOrderByHoraChegada(
+                        carreira.getId(), paragem.getId(), diaSemana);
 
         int idx = horarios.size() - 1; // fallback: último horário do dia
         for (int i = 0; i < horarios.size(); i++) {

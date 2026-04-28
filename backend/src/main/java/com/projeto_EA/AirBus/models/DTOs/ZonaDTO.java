@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ZonaDTO {
-    private Long ID;
+    private Long id;
     private String nome;
 
     public ZonaDTO(ZonaGeograficaEntity z) {
-        this.ID = z.getID();
+        this.id = z.getId();
         this.nome = z.getNome();
     }
 }

@@ -22,7 +22,10 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const url = error.config?.url ?? '';
+    const isAuthEndpoint = url.includes('/api/auth/');
+    if (status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('et_token');
       localStorage.removeItem('et_user');
       window.location.replace('/#/login');

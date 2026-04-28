@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter @Setter @NoArgsConstructor
 public class ViagemDTO {
-    private Long ID;
+    private Long id;
     private String estado;
     private LocalDateTime dataHoraEntrada;
     private LocalDateTime dataHoraSaida;
@@ -22,8 +22,8 @@ public class ViagemDTO {
     private String matriculaVeiculo;
 
     public ViagemDTO(ViagemEntity v) {
-        this.ID = v.getID();
-        this.estado = v.getEstado();
+        this.id = v.getId();
+        this.estado = v.getEstado().name();
         this.dataHoraEntrada = v.getDataHoraEntrada();
         this.dataHoraSaida = v.getDataHoraSaida();
         this.irregular = v.isIrregular();
