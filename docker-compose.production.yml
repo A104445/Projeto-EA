@@ -38,9 +38,9 @@ services:
         ]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 15
       start_interval: 10s
-      start_period: 100s
+      start_period: 300s
 
   seed:
     image: postgres:18-alpine

@@ -19,7 +19,7 @@ env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
   GCP_ZONE: us-central1-a
   VM_NAME: airbus-vm
-  VM_MACHINE_IMAGE: ubuntu-docker-ea
+  VM_MACHINE_IMAGE: docker-ea-image
   VM_USER: airbus
   BACKEND_REPLICAS: ${{ github.event.inputs.backend_replicas || '3' }}
 
