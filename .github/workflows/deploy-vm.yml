@@ -151,8 +151,12 @@ jobs:
               sudo chmod 600 /opt/airbus/.env
               echo '$GHCR_TOKEN' | sudo docker login ghcr.io -u '$GHCR_USER' --password-stdin
               cd /opt/airbus
+
               sudo docker compose --env-file .env pull
+              sudo docker compose --env-file .env up -d --scale backend=1 postgres backend
+              sudo docker compose --env-file .env up --abort-on-container-exit --exit-code-from seed seed
               sudo docker compose --env-file .env up -d --scale backend=$BACKEND_REPLICAS --remove-orphans app
+
               sudo docker image prune -f
               sudo docker compose ps"
 
