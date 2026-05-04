@@ -1,16 +1,5 @@
 package com.projeto_EA.AirBus.services;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -26,15 +15,19 @@ import com.projeto_EA.AirBus.models.DTOs.UserDTO;
 import com.projeto_EA.AirBus.models.entities.UserEntity;
 import com.projeto_EA.AirBus.repositories.UserRepository;
 import com.projeto_EA.AirBus.security.JwtUtil;
-
-import jakarta.annotation.PostConstruct;
 import com.projeto_EA.AirBus.security.UserDetailsAdapter;
+import jakarta.annotation.PostConstruct;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -62,9 +55,12 @@ public class AuthService {
     @PostConstruct
     void initGoogleVerifier() {
         if (googleClientId != null && !googleClientId.isBlank()) {
-            googleVerifier = new GoogleIdTokenVerifier.Builder(httpTransport, jsonFactory)
-                    .setAudience(Collections.singletonList(googleClientId))
-                    .build();
+            googleVerifier = new GoogleIdTokenVerifier.Builder(
+                httpTransport,
+                jsonFactory
+            )
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
         }
     }
 
@@ -86,52 +82,83 @@ public class AuthService {
 
     public AuthResponseDTO login(LoginRequestDTO request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            new UsernamePasswordAuthenticationToken(
+                request.getEmail(),
+                request.getPassword()
+            )
         );
-        UserEntity user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado!"));
+        UserEntity user = userRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() ->
+                new IllegalArgumentException("Utilizador não encontrado!")
+            );
         String token = jwtUtil.generateToken(new UserDetailsAdapter(user));
         return new AuthResponseDTO(token, new UserDTO(user));
     }
 
     public AuthResponseDTO loginWithGoogle(GoogleLoginRequestDTO request) {
-        if (googleVerifier == null || googleClientSecret == null || googleClientSecret.isBlank()) {
-            throw new IllegalStateException("Login Google não configurado no servidor.");
+        if (
+            googleVerifier == null ||
+            googleClientSecret == null ||
+            googleClientSecret.isBlank()
+        ) {
+            throw new IllegalStateException(
+                "Login Google não configurado no servidor."
+            );
         }
 
         Payload payload;
         try {
-            GoogleTokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
-                    httpTransport, jsonFactory,
-                    googleClientId, googleClientSecret,
-                    request.getCode(), googleRedirectUri
-            ).execute();
+            GoogleTokenResponse tokenResponse =
+                new GoogleAuthorizationCodeTokenRequest(
+                    httpTransport,
+                    jsonFactory,
+                    googleClientId,
+                    googleClientSecret,
+                    request.getCode(),
+                    googleRedirectUri
+                ).execute();
 
-            GoogleIdToken idToken = googleVerifier.verify(tokenResponse.getIdToken());
+            GoogleIdToken idToken = googleVerifier.verify(
+                tokenResponse.getIdToken()
+            );
             if (idToken == null) {
                 throw new IllegalArgumentException("Token Google inválido.");
             }
             payload = idToken.getPayload();
         } catch (IOException | GeneralSecurityException e) {
-            throw new IllegalStateException("Falha ao validar login com Google.", e);
+            throw new IllegalStateException(
+                "Falha ao validar login com Google.",
+                e
+            );
         }
 
         if (!Boolean.TRUE.equals(payload.getEmailVerified())) {
-            throw new IllegalArgumentException("Conta Google sem e-mail verificado.");
+            throw new IllegalArgumentException(
+                "Conta Google sem e-mail verificado."
+            );
         }
 
         String email = payload.getEmail().trim().toLowerCase();
         String name = (String) payload.get("name");
 
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseGet(() -> createGoogleUser(email, name));
+        UserEntity user = userRepository
+            .findByEmail(email)
+            .orElseGet(() -> createGoogleUser(email, name));
 
-        return new AuthResponseDTO(jwtUtil.generateToken(new UserDetailsAdapter(user)), new UserDTO(user));
+        return new AuthResponseDTO(
+            jwtUtil.generateToken(new UserDetailsAdapter(user)),
+            new UserDTO(user)
+        );
     }
 
     private UserEntity createGoogleUser(String email, String name) {
         UserEntity user = new UserEntity();
-        user.setNome((name != null && !name.isBlank()) ? name.trim() : email.split("@")[0]);
+        user.setNome(
+            (name != null && !name.isBlank())
+                ? name.trim()
+                : email.split("@")[0]
+        );
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
         return userRepository.save(user);

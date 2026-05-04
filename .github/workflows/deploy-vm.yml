@@ -6,6 +6,10 @@ on:
       confirm:
         description: "Type DEPLOY to deploy the AirBus VM"
         required: true
+      backend_replicas:
+        description: "Number of backend replicas to run after seeding"
+        required: true
+        default: "3"
 
 concurrency:
   group: vm-deploy
@@ -17,6 +21,7 @@ env:
   VM_NAME: airbus-vm
   VM_MACHINE_IMAGE: ubuntu-docker-ea
   VM_USER: airbus
+  BACKEND_REPLICAS: ${{ github.event.inputs.backend_replicas || '3' }}
 
 jobs:
   build:
@@ -110,6 +115,7 @@ jobs:
           AIRBUS_APP_IMAGE: ${{ needs.build.outputs.app_image }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
+          BACKEND_REPLICAS: ${{ env.BACKEND_REPLICAS }}
         run: |
           VM_IP=$(gcloud compute instances describe "$VM_NAME" \
             --project="$GCP_PROJECT" --zone="$GCP_ZONE" \
@@ -129,7 +135,7 @@ jobs:
           EOF
 
           gcloud compute scp \
-            docker-compose.production.yml /tmp/airbus.env \
+            docker-compose.production.yml data/seed.sql data/check-seed.sh /tmp/airbus.env \
             "$VM_USER@$VM_NAME":/tmp/ \
             --project="$GCP_PROJECT" --zone="$GCP_ZONE" --tunnel-through-iap --quiet
           rm -f /tmp/airbus.env
@@ -137,13 +143,17 @@ jobs:
           gcloud compute ssh "$VM_USER@$VM_NAME" \
             --project="$GCP_PROJECT" --zone="$GCP_ZONE" --tunnel-through-iap --quiet \
             --command="set -euo pipefail
+              sudo mkdir -p /opt/airbus/data
               sudo mv /tmp/docker-compose.production.yml /opt/airbus/docker-compose.yml
+              sudo mv /tmp/seed.sql /opt/airbus/data/seed.sql
+              sudo mv /tmp/check-seed.sh /opt/airbus/data/check-seed.sh
               sudo mv /tmp/airbus.env /opt/airbus/.env
+              sudo chmod 644 /opt/airbus/data/seed.sql /opt/airbus/data/check-seed.sh
               sudo chmod 600 /opt/airbus/.env
               echo '$GHCR_TOKEN' | sudo docker login ghcr.io -u '$GHCR_USER' --password-stdin
               cd /opt/airbus
               sudo docker compose --env-file .env pull
-              sudo docker compose --env-file .env up -d --remove-orphans
+              sudo docker compose --env-file .env up -d --scale backend=$BACKEND_REPLICAS --remove-orphans app
               sudo docker image prune -f
               sudo docker compose ps"
 

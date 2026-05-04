@@ -31,6 +31,25 @@ services:
       postgres:
         condition: service_healthy
 
+  seed:
+    image: postgres:18-alpine
+    restart: "no"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-airbus}
+    volumes:
+      - ./data/seed.sql:/seed/seed.sql:ro
+      - ./data/seed-if-needed.sh:/seed/check-seed.sh:ro
+    command: ["sh", "/seed/check-seed.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
   app:
     image: ${AIRBUS_APP_IMAGE}
     restart: unless-stopped
@@ -39,6 +58,8 @@ services:
     depends_on:
       backend:
         condition: service_started
+      seed:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
