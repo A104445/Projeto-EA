@@ -60,6 +60,8 @@ services:
         condition: service_started
       seed:
         condition: service_completed_successfully
+    environment:
+      VITE_API_URL: "/"
     healthcheck:
       test:
         [
