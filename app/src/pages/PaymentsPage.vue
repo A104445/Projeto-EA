@@ -1,383 +1,75 @@
 <template>
-  <q-page class="pagamentos-page">
+  <q-page class="bilheteira-page">
 
-    <PageHeader title="Bilhetes" />
+    <PageHeader title="Bilheteira" />
 
     <div class="page-content">
-      <div class="section-label">Os meus títulos ativos</div>
+      <div class="section-label">O que pretendes comprar?</div>
 
-      <div v-if="titulosLoading" class="q-mb-md">
-        <q-item v-for="i in 2" :key="i" class="titulo-card">
-          <q-item-section>
-            <q-skeleton type="text" width="50%" />
-            <q-skeleton type="text" width="70%" />
-          </q-item-section>
-        </q-item>
-      </div>
-
-      <div v-else-if="titulos.length === 0" class="empty-state">
-        <q-icon name="credit_card_off" size="32px" color="grey-4" />
-        <p>Nenhum título ativo...</p>
-      </div>
-
-      <template v-else>
-        <div v-for="t in titulos" :key="t.id" class="titulo-card">
-          <div class="titulo-card-left">
-            <q-icon :name="tipoIcon(t.tipo)" size="22px" :color="tipoColor(t.tipo)" />
+      <div class="opcoes-list">
+        <div class="opcao-card" @click="$router.push('/app/bilhetes/comprar/passe')">
+          <div class="opcao-icon">
+            <q-icon name="card_membership" size="26px" color="white" />
           </div>
-          <div class="titulo-card-body">
-            <span class="titulo-tipo">{{ t.tipo?.replace(/_/g, ' ') }}</span>
-            <div class="titulo-zonas-row">
-              <ZoneBadge v-for="zona in t.zonas" :key="zona" :zona="zona" />
-            </div>
-            <span v-if="t.dataFim" class="titulo-validade">Válido até {{ formatDate(t.dataFim) }}</span>
-            <span v-if="t.saldoRestante != null" class="titulo-validade">
-              {{ t.saldoRestante }} viagem(ns) restante(s)
-            </span>
+          <div class="opcao-text">
+            <span class="opcao-nome">Passe Anual</span>
           </div>
-          <q-badge
-            :color="t.valido ? 'green-2' : 'red-2'"
-            :text-color="t.valido ? 'green-9' : 'red-9'"
-            class="titulo-badge"
-          >
-            {{ t.valido ? 'Ativo' : 'Inválido' }}
-          </q-badge>
-        </div>
-      </template>
-
-      <!-- adquirir título -->
-      <div class="section-label q-mt-lg">Adquirir título</div>
-
-      <div class="compra-grid">
-        <div class="compra-card" @click="openDialog('passe')">
-          <div class="compra-icon-wrap bg-blue-1">
-            <q-icon name="card_membership" size="28px" color="blue-7" />
-          </div>
-          <div class="compra-info">
-            <span class="compra-nome">Passe Anual</span>
-            <span class="compra-desc">Viagens ilimitadas por 1 ano.</span>
-          </div>
-          <q-icon name="chevron_right" color="grey-4" />
+          <q-icon name="chevron_right" color="grey-4" size="20px" />
         </div>
 
-        <div class="compra-card" @click="openDialog('bilhete')">
-          <div class="compra-icon-wrap bg-orange-1">
-            <q-icon name="confirmation_number" size="28px" color="orange-7" />
+        <div class="opcao-card" @click="$router.push('/app/bilhetes/comprar/pacote')">
+          <div class="opcao-icon">
+            <q-icon name="local_activity" size="26px" color="white" />
           </div>
-          <div class="compra-info">
-            <span class="compra-nome">Bilhete Individual</span>
-            <span class="compra-desc">Uma viagem numa carreira à sua escolha.</span>
+          <div class="opcao-text">
+            <span class="opcao-nome">Pacote de Viagens</span>
           </div>
-          <q-icon name="chevron_right" color="grey-4" />
+          <q-icon name="chevron_right" color="grey-4" size="20px" />
         </div>
 
-        <div class="compra-card" @click="openDialog('pacote')">
-          <div class="compra-icon-wrap bg-purple-1">
-            <q-icon name="local_activity" size="28px" color="purple-7" />
+        <div class="opcao-card" @click="$router.push('/app/bilhetes/comprar/bilhete')">
+          <div class="opcao-icon">
+            <q-icon name="directions_bus" size="26px" color="white" />
           </div>
-          <div class="compra-info">
-            <span class="compra-nome">Pacote de Viagens</span>
-            <span class="compra-desc">Escolhe o número de viagens e zonas.</span>
+          <div class="opcao-text">
+            <span class="opcao-nome">Bilhete Individual</span>
           </div>
-          <q-icon name="chevron_right" color="grey-4" />
+          <q-icon name="chevron_right" color="grey-4" size="20px" />
         </div>
       </div>
     </div>
 
-    <!-- ───── passe anual (dialog) ───── -->
-    <q-dialog v-model="dialogs.passe" position="bottom">
-      <q-card class="bottom-sheet">
-        <q-card-section class="sheet-header">
-          <span class="sheet-title">Passe Anual</span>
-          <q-btn flat round dense icon="close" @click="dialogs.passe = false" />
-        </q-card-section>
-        <q-card-section class="sheet-body">
-          <p class="sheet-desc">Válido por 12 meses. Seleciona as zonas geográficas que queres cobrir:</p>
-          <div class="field-label q-mb-xs">ZONAS</div>
-          <ZonaPicker
-            :zonas="zonas"
-            :selected-ids="passeForm.zonaIDs"
-            :loading="zonasLoading"
-            :error="zonasError"
-            @toggle="(id) => toggleZona(passeForm.zonaIDs, id)"
-            @retry="loadZonas"
-          />
-          <q-banner v-if="errors.passe" rounded dense class="bg-red-1 text-red-8 q-mt-sm">
-            {{ errors.passe }}
-          </q-banner>
-        </q-card-section>
-        <q-card-actions class="sheet-actions">
-          <q-btn unelevated class="et-btn-primary full-width" label="Confirmar compra"
-                 :loading="loading.passe" :disable="passeForm.zonaIDs.length === 0"
-                 @click="comprarPasse" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- ───── bilhete individual (dialog) ───── -->
-    <q-dialog v-model="dialogs.bilhete" position="bottom">
-      <q-card class="bottom-sheet">
-        <q-card-section class="sheet-header">
-          <span class="sheet-title">Bilhete Individual</span>
-          <q-btn flat round dense icon="close" @click="dialogs.bilhete = false" />
-        </q-card-section>
-        <q-card-section class="sheet-body">
-          <p class="sheet-desc">Bilhete válido para uma viagem até ao dia seguinte. Seleciona a carreira:</p>
-          <div class="field-label q-mb-xs">CARREIRA</div>
-          <div v-if="carreirasLoading" class="text-grey-5 text-caption">A carregar carreiras...</div>
-          <q-banner v-else-if="carreirasError" rounded dense class="bg-orange-1 text-orange-9 q-mb-sm">
-            {{ carreirasError }}
-            <template #action>
-              <q-btn flat dense label="Tentar novamente" @click="loadCarreiras" />
-            </template>
-          </q-banner>
-          <template v-else>
-            <q-input v-model="searchCarreira" outlined dense placeholder="Pesquisar carreira..."
-                     class="q-mb-sm" clearable>
-              <template #prepend><q-icon name="search" color="grey-5" /></template>
-            </q-input>
-            <q-list separator class="carreiras-list">
-              <q-item
-                v-for="c in carreirasFiltradas" :key="c.id"
-                clickable
-                :class="{ 'carreira-selected': bilheteForm.carreiraID === c.id }"
-                @click="bilheteForm.carreiraID = c.id"
-              >
-                <q-item-section avatar>
-                  <q-icon name="directions_bus" :color="bilheteForm.carreiraID === c.id ? 'blue-7' : 'grey-5'" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
-                  <q-item-label caption>{{ c.paragens?.length ?? 0 }} paragens</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-icon v-if="bilheteForm.carreiraID === c.id" name="check_circle" color="blue-7" />
-                </q-item-section>
-              </q-item>
-              <q-item v-if="carreirasFiltradas.length === 0">
-                <q-item-section class="text-grey-5 text-caption text-center">Nenhuma carreira encontrada.</q-item-section>
-              </q-item>
-            </q-list>
-          </template>
-          <q-banner v-if="errors.bilhete" rounded dense class="bg-red-1 text-red-8 q-mt-sm">
-            {{ errors.bilhete }}
-          </q-banner>
-        </q-card-section>
-        <q-card-actions class="sheet-actions">
-          <q-btn unelevated class="et-btn-primary full-width" label="Confirmar compra"
-                 :loading="loading.bilhete" :disable="!bilheteForm.carreiraID"
-                 @click="comprarBilhete" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- ───── pacote de viagens (dialog) ───── -->
-    <q-dialog v-model="dialogs.pacote" position="bottom">
-      <q-card class="bottom-sheet">
-        <q-card-section class="sheet-header">
-          <span class="sheet-title">Pacote de Viagens</span>
-          <q-btn flat round dense icon="close" @click="dialogs.pacote = false" />
-        </q-card-section>
-        <q-card-section class="sheet-body">
-          <p class="sheet-desc">Escolhe o número de viagens e as zonas a cobrir: </p>
-          <div class="field-label q-mb-xs">Nº DE VIAGENS</div>
-          <div class="num-viagens-row">
-            <q-btn flat round icon="remove" :disable="pacoteForm.numViagens <= 1" @click="pacoteForm.numViagens--" />
-            <span class="num-viagens-val">{{ pacoteForm.numViagens }}</span>
-            <q-btn flat round icon="add" @click="pacoteForm.numViagens++" />
-          </div>
-          <div class="field-label q-mt-md q-mb-xs">ZONAS</div>
-          <ZonaPicker
-            :zonas="zonas"
-            :selected-ids="pacoteForm.zonaIDs"
-            :loading="zonasLoading"
-            :error="zonasError"
-            @toggle="(id) => toggleZona(pacoteForm.zonaIDs, id)"
-            @retry="loadZonas"
-          />
-          <q-banner v-if="errors.pacote" rounded dense class="bg-red-1 text-red-8 q-mt-sm">
-            {{ errors.pacote }}
-          </q-banner>
-        </q-card-section>
-        <q-card-actions class="sheet-actions">
-          <q-btn unelevated class="et-btn-primary full-width" label="Confirmar compra"
-                 :loading="loading.pacote" :disable="pacoteForm.zonaIDs.length === 0"
-                 @click="comprarPacote" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- success dialog -->
-    <ResultDialog
-      v-model="successDialog"
-      icon="check_circle"
-      icon-color="green-6"
-      title="Compra concluída!"
-      message="O teu título foi adicionado à conta."
-    />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
 import PageHeader from 'components/PageHeader.vue';
-import ZoneBadge from 'components/ZoneBadge.vue';
-import ResultDialog from 'components/ResultDialog.vue';
-import ZonaPicker from 'components/ZonaPicker.vue';
-import type { TituloDTO, ZonaDTO, CarreiraDTO } from 'components/models';
-import { formatDate } from 'src/utils/formatters';
-import { tipoIcon, tipoColor } from 'src/utils/titulo';
-import { titlesService } from 'src/services/titlesService';
-import { zonesService } from 'src/services/zonesService';
-import { routesService } from 'src/services/routesService';
-
-const titulos        = ref<TituloDTO[]>([]);
-const titulosLoading = ref(true);
-
-const zonas         = ref<ZonaDTO[]>([]);
-const zonasLoading  = ref(true);
-const zonasError    = ref('');
-
-const carreiras        = ref<CarreiraDTO[]>([]);
-const carreirasLoading = ref(true);
-const carreirasError   = ref('');
-
-const dialogs       = reactive({ passe: false, bilhete: false, pacote: false });
-const loading       = reactive({ passe: false, bilhete: false, pacote: false });
-const errors        = reactive({ passe: '', bilhete: '', pacote: '' });
-const successDialog = ref(false);
-
-const passeForm     = reactive<{ zonaIDs: number[] }>({ zonaIDs: [] });
-const bilheteForm   = reactive<{ carreiraID: number | null }>({ carreiraID: null });
-const searchCarreira = ref('');
-const carreirasFiltradas = computed(() => {
-  const q = searchCarreira.value.trim().toLowerCase();
-  if (!q) return carreiras.value;
-  return carreiras.value.filter(
-    (c) => c.num.toLowerCase().includes(q) || c.nome.toLowerCase().includes(q),
-  );
-});
-const pacoteForm = reactive<{ numViagens: number; zonaIDs: number[] }>({ numViagens: 5, zonaIDs: [] });
-
-onMounted(() => {
-  void loadTitulos();
-  void loadZonas();
-  void loadCarreiras();
-});
-
-async function loadTitulos() {
-  try   { titulos.value = (await titlesService.getAll()).filter((t) => t.valido); }
-  finally { titulosLoading.value = false; }
-}
-
-async function loadZonas() {
-  zonasError.value = '';
-  try   { zonas.value = await zonesService.getAll(); }
-  catch (e: unknown) {
-    const err = e as { response?: { status?: number }; message?: string };
-    zonasError.value = `Ocorreu um erro ao carregar as zonas (${err?.response?.status ?? err?.message ?? 'sem resposta'})`;
-  } finally { zonasLoading.value = false; }
-}
-
-async function loadCarreiras() {
-  carreirasError.value = '';
-  try   { carreiras.value = await routesService.getAll(); }
-  catch (e: unknown) {
-    const err = e as { response?: { status?: number }; message?: string };
-    carreirasError.value = `Ocorreu um erro ao carregar carreiras (${err?.response?.status ?? err?.message ?? 'sem resposta'})`;
-  } finally { carreirasLoading.value = false; }
-}
-
-function openDialog(tipo: 'passe' | 'bilhete' | 'pacote') {
-  errors[tipo] = '';
-  if (tipo === 'passe')   passeForm.zonaIDs = [];
-  if (tipo === 'bilhete') bilheteForm.carreiraID = null;
-  if (tipo === 'pacote')  { pacoteForm.zonaIDs = []; pacoteForm.numViagens = 5; }
-  dialogs[tipo] = true;
-}
-
-async function comprarPasse() {
-  errors.passe = '';  loading.passe = true;
-  try {
-    await titlesService.buyPasseAnual(passeForm.zonaIDs);
-    dialogs.passe = false;  successDialog.value = true;  void loadTitulos();
-  } catch { errors.passe = 'Ocorreu um erro ao adquirir o passe. Tente novamente...'; }
-  finally  { loading.passe = false; }
-}
-
-async function comprarBilhete() {
-  errors.bilhete = '';  loading.bilhete = true;
-  try {
-    await titlesService.buyBilhete(bilheteForm.carreiraID!);
-    dialogs.bilhete = false;  successDialog.value = true;  void loadTitulos();
-  } catch { errors.bilhete = 'Ocorreu um erro ao adquirir o bilhete. Tente novamente...'; }
-  finally  { loading.bilhete = false; }
-}
-
-async function comprarPacote() {
-  errors.pacote = '';  loading.pacote = true;
-  try {
-    await titlesService.buyPacote(pacoteForm.numViagens, pacoteForm.zonaIDs);
-    dialogs.pacote = false;  successDialog.value = true;  void loadTitulos();
-  } catch { errors.pacote = 'Ocorreu um erro ao adquirir o pacote de bilhetes. Tente novamente...'; }
-  finally  { loading.pacote = false; }
-}
-
-function toggleZona(list: number[], id: number) {
-  const idx = list.indexOf(id);
-  if (idx === -1) list.push(id);
-  else list.splice(idx, 1);
-}
 </script>
 
 <style scoped>
-.pagamentos-page { background: var(--et-bg); min-height: 100dvh; }
+.bilheteira-page { background: var(--et-bg); min-height: 100dvh; }
 
 .section-label {
   font-size: 13px; font-weight: 700; color: var(--et-subtext);
-  letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px;
+  letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 12px;
 }
 
-/* títulos */
-.titulo-card {
-  background: white; border-radius: 12px; padding: 14px 16px;
-  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
-}
-.titulo-card-left {
-  width: 40px; height: 40px; background: #f3f4f6; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.titulo-card-body { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.titulo-tipo    { font-weight: 600; font-size: 14px; color: var(--et-text); }
-.titulo-zonas-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
-.titulo-validade { font-size: 11px; color: #9ca3af; }
-.titulo-badge   { font-size: 11px; padding: 4px 8px; border-radius: 20px; }
+.opcoes-list { display: flex; flex-direction: column; gap: 10px; }
 
-/* cards */
-.compra-grid { display: flex; flex-direction: column; gap: 8px; }
-.compra-card {
-  background: white; border-radius: 12px; padding: 14px 16px;
+.opcao-card {
+  background: white; border-radius: 16px; padding: 16px;
   display: flex; align-items: center; gap: 14px;
   cursor: pointer; transition: background 0.15s;
+  border: 1px solid var(--et-border);
 }
-.compra-card:active { background: #f9fafb; }
-.compra-icon-wrap {
+.opcao-card:active { background: #f9fafb; }
+
+.opcao-icon {
   width: 48px; height: 48px; border-radius: 12px;
+  background: #719BF5;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.compra-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.compra-nome { font-weight: 600; font-size: 15px; color: var(--et-text); }
-.compra-desc { font-size: 12px; color: var(--et-subtext); }
 
-/* dialog internals */
-.carreiras-list {
-  border: 1px solid var(--et-border); border-radius: 10px;
-  overflow-y: auto; max-height: 260px;
-}
-.carreira-selected { background: #eff6ff !important; }
-.num-viagens-row { display: flex; align-items: center; gap: 16px; }
-.num-viagens-val {
-  font-size: 24px; font-weight: 700; color: var(--et-text);
-  min-width: 32px; text-align: center;
-}
+.opcao-text { flex: 1; display: flex; align-items: center; }
+.opcao-nome { font-size: 15px; font-weight: 700; color: var(--et-text); }
 </style>

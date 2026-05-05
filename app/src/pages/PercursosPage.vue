@@ -1,262 +1,371 @@
 <template>
   <q-page class="percursos-page">
-    <PageHeader title="Histórico de Viagens" />
+    <div class="percursos-header">
+      <h1 class="page-title">Percursos e Horários</h1>
+    </div>
 
-    <div class="page-content">
-      <!-- barra de pesquisa + filtrar -->
-      <div class="search-row">
-        <q-input
-          v-model="searchText"
-          outlined dense clearable placeholder="Pesquisar linha..."
-          class="search-input"
-          bg-color="white"
-        >
-          <template #prepend><q-icon name="search" color="grey-5" /></template>
-        </q-input>
-        <button class="filter-btn" :class="{ 'filter-btn--active': hasActiveFilters }" @click="filterDialog = true">
-          <q-icon name="tune" size="18px" />
-          <span>Filtrar</span>
-          <span v-if="activeFilterCount > 0" class="filter-badge">{{ activeFilterCount }}</span>
-        </button>
-      </div>
+    <div class="percursos-content">
 
-      <!-- chips de filtros ativos -->
-      <div v-if="hasActiveFilters" class="active-chips">
-        <span v-if="filterStatus === 'irregulares'" class="active-chip">
-          Irregulares
-          <q-icon name="close" size="12px" class="chip-close" @click="filterStatus = 'todas'" />
-        </span>
-        <span v-if="filterData" class="active-chip">
-          {{ filterData }}
-          <q-icon name="close" size="12px" class="chip-close" @click="filterData = ''" />
-        </span>
-        <button class="clear-all" @click="clearFilters">Limpar tudo</button>
-      </div>
+      <q-input
+        v-model="search"
+        outlined
+        clearable
+        placeholder="Procurar linha..."
+        class="search-input"
+      >
+        <template #prepend>
+          <q-icon name="directions_bus" color="primary" size="20px" />
+        </template>
+      </q-input>
 
-      <!-- lista -->
-      <template v-if="loading">
-        <div v-for="i in 4" :key="i" class="trip-card">
-          <q-skeleton type="circle" size="44px" />
-          <div class="trip-card-body" style="flex:1">
-            <q-skeleton type="text" width="55%" />
-            <q-skeleton type="text" width="75%" style="margin-top:4px" />
-            <q-skeleton type="text" width="40%" style="margin-top:4px" />
-          </div>
-        </div>
-      </template>
-
-      <div v-else-if="filtered.length === 0" class="empty-state">
-        <q-icon name="route" size="48px" color="grey-4" />
-        <p>{{ hasActiveFilters ? 'Nenhuma viagem corresponde aos filtros.' : 'Ainda não tens viagens.' }}</p>
-        <button v-if="hasActiveFilters" class="clear-all-empty" @click="clearFilters">Limpar filtros</button>
+      <div v-if="loading" class="text-center q-py-lg">
+        <q-spinner color="blue-6" size="32px" />
       </div>
 
       <template v-else>
-        <div v-for="v in filtered" :key="v.id" class="trip-card">
-          <div class="trip-icon-wrap" :class="iconClass(v)">
-            <q-icon :name="tripIconFromNome(v.carreiraNome)" size="20px" color="white" />
-          </div>
-          <div class="trip-card-body">
-            <div class="trip-card-top">
-              <span class="trip-carreira">{{ v.carreiraNum }} — {{ v.carreiraNome }}</span>
-              <span v-if="v.irregular" class="badge-irregular">Irregular</span>
-              <span v-else-if="v.estado === 'EM_CURSO'" class="badge-em-curso">Em curso</span>
-            </div>
-            <p class="trip-route">
-              {{ v.origemNome }}
-              <q-icon name="arrow_forward" size="12px" style="margin: 0 2px; vertical-align: middle;" />
-              {{ v.destinoNome ?? '—' }}
-            </p>
-            <div class="trip-meta">
-              <span>{{ formatDateTime(v.dataHoraEntrada) }}</span>
-              <span v-if="v.dataHoraSaida" class="trip-duration">· {{ duration(v.dataHoraEntrada, v.dataHoraSaida) }}</span>
-            </div>
-          </div>
+        <div
+          v-for="c in carreirasFiltradas"
+          :key="c.id"
+          class="linha-card"
+        >
+          <span class="linha-nome">{{ c.num }} — {{ c.nome }}</span>
+          <q-btn flat round dense icon="schedule" color="blue-7" @click="verDetalhe(c)" />
+        </div>
+        <div v-if="carreirasFiltradas.length === 0" class="empty-state">
+          <p>Nenhuma carreira encontrada.</p>
         </div>
       </template>
     </div>
 
-    <!-- ── filter sheet ── -->
-    <q-dialog v-model="filterDialog" position="bottom">
-      <q-card class="bottom-sheet">
+    <!-- sheet de horários -->
+    <q-dialog v-model="horarioDialog" position="bottom" @hide="resetHorario">
+      <q-card class="bottom-sheet horarios-sheet">
+
         <q-card-section class="sheet-header">
-          <span class="sheet-title">Filtrar viagens</span>
-          <q-btn flat round dense icon="close" @click="filterDialog = false" />
+          <span class="sheet-title">Horário — {{ carreiraLabel }}</span>
+          <q-btn flat round dense icon="close" @click="horarioDialog = false" />
+        </q-card-section>
+
+        <!-- seletor de dia da semana -->
+        <q-card-section class="day-selector-section">
+          <div class="day-chips">
+            <button
+              v-for="d in DAYS"
+              :key="d.value"
+              :class="['day-chip', selectedDay === d.value ? 'day-chip--active' : '']"
+              @click="selectDay(d.value)"
+            >{{ d.label }}</button>
+          </div>
         </q-card-section>
 
         <q-card-section class="sheet-body">
-          <!-- estado -->
-          <div class="field-label q-mb-sm">ESTADO</div>
-          <div class="status-chips">
-            <button
-              v-for="opt in statusOpts" :key="opt.value"
-              class="status-chip"
-              :class="{ 'status-chip--active': filterStatus === opt.value }"
-              @click="filterStatus = opt.value"
-            >{{ opt.label }}</button>
+          <div v-if="horariosLoading" class="text-center q-py-lg">
+            <q-spinner color="blue-6" size="32px" />
           </div>
-
-          <!-- data -->
-          <div class="field-label q-mt-md q-mb-sm">DATA</div>
-          <q-input
-            v-model="filterData"
-            outlined dense clearable
-            type="date"
-            bg-color="white"
-          />
+          <div v-else-if="trips.length === 0" class="empty-state">
+            <p>Sem horários para este dia.</p>
+          </div>
+          <div v-else class="trips-list">
+            <div v-for="(trip, idx) in trips" :key="idx" class="trip-card">
+              <div class="trip-diagram">
+                <template v-for="(stop, si) in trip" :key="si">
+                  <!-- linha de conteúdo: hora | dot | nome alinhados ao centro -->
+                  <div class="trip-stop">
+                    <div class="stop-time">{{ stop.time ?? '—' }}</div>
+                    <div class="stop-dot-wrap"><div class="stop-dot" /></div>
+                    <div class="stop-name">{{ stop.paragemNome }}</div>
+                  </div>
+                  <!-- linha conectora entre paragens -->
+                  <div v-if="si < trip.length - 1" class="trip-connector">
+                    <div class="stop-vert" />
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
         </q-card-section>
 
-        <q-card-actions class="sheet-actions">
-          <q-btn flat label="Limpar" color="grey-6" @click="clearFilters" />
-          <q-btn unelevated class="et-btn-primary" label="Aplicar" @click="filterDialog = false" />
-        </q-card-actions>
       </q-card>
     </q-dialog>
+
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import PageHeader from 'components/PageHeader.vue';
-import type { ViagemDTO } from 'components/models';
-import { formatDateTime, duration } from 'src/utils/formatters';
-import { tripIconFromNome } from 'src/utils/titulo';
-import { tripsService } from 'src/services/tripsService';
+import type { CarreiraDTO, HorarioDTO } from 'components/models';
+import { routesService } from 'src/services/routesService';
 
-const viagens = ref<ViagemDTO[]>([]);
-const loading = ref(true);
+const DAYS = [
+  { value: 1, label: 'seg.' },
+  { value: 2, label: 'ter.' },
+  { value: 3, label: 'qua.' },
+  { value: 4, label: 'qui.' },
+  { value: 5, label: 'sex.' },
+  { value: 6, label: 'sáb.' },
+  { value: 7, label: 'dom.' },
+];
 
-const filterDialog = ref(false);
-const searchText   = ref('');
-const filterStatus = ref<'todas' | 'irregulares'>('todas');
-const filterData   = ref('');
+const carreiras     = ref<CarreiraDTO[]>([]);
+const loading       = ref(true);
+const search        = ref('');
 
-const statusOpts = [
-  { value: 'todas',       label: 'Todas' },
-  { value: 'irregulares', label: 'Irregulares' },
-] as const;
+const horarioDialog    = ref(false);
+const carreiraLabel    = ref('');
+const horarios         = ref<HorarioDTO[]>([]);
+const horariosLoading  = ref(false);
+const selectedDay      = ref(1);
+const selectedCarreira = ref<CarreiraDTO | null>(null);
 
-const activeFilterCount = computed(() => {
-  let n = 0;
-  if (filterStatus.value !== 'todas') n++;
-  if (filterData.value) n++;
-  return n;
+const carreirasFiltradas = computed(() => {
+  const q = search.value.trim().toLowerCase();
+  if (!q) return carreiras.value;
+  return carreiras.value.filter(
+    (c) => c.num.toLowerCase().includes(q) || c.nome.toLowerCase().includes(q),
+  );
 });
-const hasActiveFilters = computed(() => activeFilterCount.value > 0 || searchText.value.trim() !== '');
 
-const filtered = computed(() => {
-  let list = viagens.value.filter((v) => v.estado !== 'EM_CURSO');
+const trips = computed(() => {
+  const stopOrder: number[] = [];
+  const stopNames = new Map<number, string>();
+  const stopTimes = new Map<number, string[]>();
 
-  if (filterStatus.value === 'irregulares') list = list.filter((v) => v.irregular);
-
-  if (filterData.value) {
-    list = list.filter((v) => v.dataHoraEntrada?.startsWith(filterData.value));
+  for (const h of horarios.value) {
+    if (!stopNames.has(h.paragemId)) {
+      stopOrder.push(h.paragemId);
+      stopNames.set(h.paragemId, h.paragemNome);
+      stopTimes.set(h.paragemId, []);
+    }
+    stopTimes.get(h.paragemId)!.push(h.horaChegada.slice(0, 5));
   }
 
-  const q = searchText.value.trim().toLowerCase();
-  if (q) {
-    list = list.filter(
-      (v) =>
-        v.carreiraNum?.toLowerCase().includes(q) ||
-        v.carreiraNome?.toLowerCase().includes(q),
-    );
+  for (const [id, times] of stopTimes) {
+    stopTimes.set(id, [...times].sort());
   }
 
-  return list;
+  const maxTrips = Math.max(0, ...Array.from(stopTimes.values()).map((t) => t.length));
+
+  return Array.from({ length: maxTrips }, (_, i) =>
+    stopOrder.map((id) => ({
+      paragemId: id,
+      paragemNome: stopNames.get(id)!,
+      time: stopTimes.get(id)?.[i] ?? null,
+    })),
+  );
 });
 
 onMounted(async () => {
-  try   { viagens.value = await tripsService.getHistory(); }
+  try   { carreiras.value = await routesService.getAll(); }
   finally { loading.value = false; }
 });
 
-function iconClass(v: ViagemDTO): string {
-  if (v.irregular)            return 'icon-irregular';
-  if (v.estado === 'EM_CURSO') return 'icon-em-curso';
-  return 'icon-normal';
+async function loadSchedules() {
+  if (!selectedCarreira.value) return;
+  horariosLoading.value = true;
+  try {
+    horarios.value = await routesService.getSchedules(selectedCarreira.value.id, selectedDay.value);
+  } finally {
+    horariosLoading.value = false;
+  }
 }
 
-function clearFilters() {
-  filterStatus.value = 'todas';
-  filterData.value   = '';
-  searchText.value   = '';
-  filterDialog.value = false;
+async function verDetalhe(c: CarreiraDTO) {
+  carreiraLabel.value    = `${c.num} — ${c.nome}`;
+  selectedCarreira.value = c;
+  horarioDialog.value    = true;
+  const jsDay = new Date().getDay();
+  selectedDay.value      = jsDay === 0 ? 7 : jsDay;
+  await loadSchedules();
+}
+
+function selectDay(day: number) {
+  selectedDay.value = day;
+  void loadSchedules();
+}
+
+function resetHorario() {
+  horarios.value         = [];
+  carreiraLabel.value    = '';
+  selectedCarreira.value = null;
 }
 </script>
 
 <style scoped>
-.percursos-page { background: var(--et-bg); min-height: 100dvh; }
+.percursos-page { background: #F6F6F6; min-height: 100dvh; }
 
-/* search + filter row */
-.search-row  { display: flex; gap: 10px; align-items: center; }
-.search-input { flex: 1; }
-
-.filter-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 0 14px; height: 40px; border-radius: 10px;
-  border: 1.5px solid var(--et-border); background: white;
-  font-size: 13px; font-weight: 600; color: var(--et-text);
-  cursor: pointer; white-space: nowrap; flex-shrink: 0;
-  transition: border-color 0.15s, background 0.15s;
+.percursos-header {
+  background: #719BF5;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 52px 20px 20px;
+  border-radius: 0 0 20px 20px;
 }
-.filter-btn--active { border-color: var(--et-blue); color: var(--et-blue); background: #eff6ff; }
-.filter-badge {
-  background: var(--et-blue); color: white;
-  font-size: 10px; font-weight: 700;
-  width: 18px; height: 18px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+.page-title {
+  color: white;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
 }
 
-/* active chips */
-.active-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.active-chip {
-  display: flex; align-items: center; gap: 5px;
-  background: #eff6ff; color: var(--et-blue);
-  border-radius: 20px; padding: 4px 10px;
-  font-size: 12px; font-weight: 600;
+.percursos-content {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-.chip-close { cursor: pointer; opacity: 0.7; }
-.chip-close:hover { opacity: 1; }
-.clear-all {
-  background: none; border: none; font-size: 12px; color: var(--et-subtext);
-  cursor: pointer; text-decoration: underline; padding: 0;
+
+.section-title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #3C3A3A;
+  margin: 0;
+  text-shadow: 0px 2px 20px rgba(0, 0, 0, 0.25);
 }
-.clear-all-empty {
-  margin-top: 10px; background: none; border: 1px solid var(--et-border);
-  border-radius: 8px; padding: 6px 16px; font-size: 13px; color: var(--et-subtext);
+
+/* ── campo de pesquisa ── */
+.search-input :deep(.q-field__control) {
+  border-radius: 20px;
+  border-color: #719BF5;
+  background: white;
+}
+.search-input :deep(.q-field__control:before) {
+  border: 1px solid #719BF5 !important;
+  border-radius: 20px;
+}
+
+/* ── cards de linha ── */
+.linha-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 0 20px;
+  height: 73px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.linha-nome {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #3C3A3A;
+}
+
+/* ── sheet de horários ── */
+.horarios-sheet {
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px 20px 0 0;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+.sheet-title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #3C3A3A;
+}
+
+/* ── day selector ── */
+.day-selector-section {
+  padding-top: 0;
+  padding-bottom: 12px;
+}
+.day-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.day-chips::-webkit-scrollbar { display: none; }
+.day-chip {
+  font-family: 'Jaldi', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #719BF5;
+  background: white;
+  color: #719BF5;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.day-chip--active {
+  background: #719BF5;
+  color: white;
 }
 
-/* status chips inside sheet */
-.status-chips { display: flex; gap: 8px; }
-.status-chip {
-  padding: 7px 18px; border-radius: 20px; border: 1.5px solid var(--et-border);
-  background: white; font-size: 13px; font-weight: 600; color: var(--et-text);
-  cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
 }
-.status-chip--active { background: var(--et-blue); color: white; border-color: var(--et-blue); }
 
-/* trip cards */
+.trips-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 .trip-card {
-  background: white; border-radius: 14px; padding: 14px 16px;
-  display: flex; align-items: flex-start; gap: 14px;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 8px;
 }
-.trip-icon-wrap {
-  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
+.trip-diagram {
+  display: flex;
+  flex-direction: column;
 }
-.icon-normal    { background: #3b82f6; }
-.icon-irregular { background: #f97316; }
-.icon-em-curso  { background: #16a34a; }
+.trip-stop {
+  display: grid;
+  grid-template-columns: 1fr 14px 1fr;
+  align-items: center;
+  column-gap: 4px;
+}
+.stop-time {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #3C3A3A;
+  text-align: right;
+  line-height: 1;
+}
+.stop-dot-wrap {
+  display: flex;
+  justify-content: center;
+}
+.stop-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #719BF5;
+  flex-shrink: 0;
+}
+.trip-connector {
+  display: grid;
+  grid-template-columns: 1fr 14px 1fr;
+  column-gap: 4px;
+  height: 14px;
+}
+.stop-vert {
+  grid-column: 2;
+  justify-self: center;
+  width: 2px;
+  height: 100%;
+  background: #719BF5;
+}
+.stop-name {
+  font-family: 'Jaldi', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #3C3A3A;
+  line-height: 1;
+}
 
-.trip-card-body { flex: 1; min-width: 0; }
-.trip-card-top  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
-.trip-carreira  { font-size: 14px; font-weight: 700; color: var(--et-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.badge-irregular { font-size: 10px; font-weight: 700; color: white; background: #f97316; border-radius: 20px; padding: 2px 8px; flex-shrink: 0; }
-.badge-em-curso  { font-size: 10px; font-weight: 700; color: white; background: #16a34a; border-radius: 20px; padding: 2px 8px; flex-shrink: 0; }
-
-.trip-route  { font-size: 13px; color: var(--et-subtext); margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.trip-meta   { font-size: 12px; color: #9ca3af; display: flex; gap: 4px; }
-.trip-duration { color: #9ca3af; }
+.empty-state { text-align: center; padding: 24px; color: #9ca3af; font-size: 14px; }
 </style>

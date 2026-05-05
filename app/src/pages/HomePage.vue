@@ -1,29 +1,28 @@
 <template>
   <q-page class="home-page">
 
+    <!-- header azul: greeting + passe + botão de bilhetes -->
     <div class="home-header">
-      <div class="home-greeting-line">
-        <span class="home-greeting-label">Olá,&nbsp;</span><span class="home-greeting-name">{{ authStore.firstName }}!</span>
+      <div class="home-header-top">
+        <div class="home-greeting">Olá, {{ authStore.firstName }}!</div>
+        <q-btn flat round icon="notifications_none" color="white" @click="$router.push('/app/notificacoes')">
+          <q-badge v-if="numNotificacoes > 0" color="red" floating :label="numNotificacoes" />
+        </q-btn>
       </div>
-      <q-btn flat round icon="notifications_none" color="white" @click="$router.push('/app/notificacoes')">
-        <q-badge v-if="numNotificacoes > 0" color="red" floating :label="numNotificacoes" />
-      </q-btn>
-    </div>
 
-    <div class="home-content">
       <!-- passe ativo -->
       <div v-if="activePasse" class="pass-card">
         <div class="pass-card-top">
-          <span class="pass-label">PASSE ATIVO</span>
-          <div class="pass-validade">
-            <span class="pass-validade-label">VALIDADE</span>
-            <span class="pass-validade-date">{{ formatDate(activePasse.dataFim) }}</span>
+          <div>
+            <span class="pass-label">passe ATIVO</span>
+            <p class="pass-type">{{ activePasse.tipo?.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) }}</p>
+            <div class="pass-zones-row">
+              <ZoneBadge v-for="zona in activePasse.zonas" :key="zona" :zona="zona" />
+            </div>
           </div>
-        </div>
-        <div class="pass-card-bottom">
-          <p class="pass-type">{{ activePasse.tipo?.replace(/_/g, ' ') }}</p>
-          <div class="pass-zones-row">
-            <ZoneBadge v-for="zona in activePasse.zonas" :key="zona" :zona="zona" />
+          <div class="pass-validade">
+            <span class="pass-validade-label">validade:</span>
+            <span class="pass-validade-date">{{ formatDate(activePasse.dataFim) }}</span>
           </div>
         </div>
       </div>
@@ -32,12 +31,15 @@
       </div>
       <div v-else class="no-pass-card">
         <q-icon name="credit_card_off" size="32px" color="grey-5" />
-        <p>Sem passe ativo</p>
+        <p>Sem passe ativo.</p>
       </div>
 
+    </div>
+
+    <div class="home-content">
       <!-- ver bilhetes -->
       <q-btn unelevated class="full-width ver-bilhetes-btn" label="VER BILHETES DISPONÍVEIS"
-             @click="$router.push('/app/bilhetes')" />
+             @click="$router.push('/app/bilhetes/meus')" />
 
       <!-- ── viagem em curso (check-out) ── -->
       <div v-if="viagemAtiva" class="viagem-ativa-card">
@@ -68,26 +70,10 @@
         <q-item-section side><q-icon name="chevron_right" color="grey-4" /></q-item-section>
       </q-item>
 
-      <!-- ── grid de ações (sempre visível) ── -->
-      <div class="quick-grid">
-        <button class="quick-btn" @click="openHorarios">
-          <div class="quick-btn-icon bg-orange-1">
-            <q-icon name="schedule" size="26px" color="orange-7" />
-          </div>
-          <span>Consultar horários</span>
-        </button>
-        <button class="quick-btn" @click="$router.push('/app/percursos?tab=planear')">
-          <div class="quick-btn-icon bg-green-1">
-            <q-icon name="directions" size="26px" color="green-7" />
-          </div>
-          <span>Planear viagem</span>
-        </button>
-      </div>
-
       <!-- viagens recentes -->
       <div class="section-header">
         <span class="section-title">Viagens recentes</span>
-        <q-btn flat no-caps dense label="Ver Histórico" color="blue-6" size="13px"
+        <q-btn flat no-caps dense label="Ver Histórico" class="ver-history-btn"
                @click="$router.push('/app/percursos')" />
       </div>
 
@@ -157,79 +143,6 @@
       </q-card>
     </q-dialog>
 
-    <!-- ── horários (sheet) ── -->
-    <q-dialog v-model="horariosDialog" position="bottom" @hide="resetHorarios">
-      <q-card class="bottom-sheet horarios-sheet">
-
-        <!-- cabeçalho dinâmico -->
-        <q-card-section class="sheet-header">
-          <div class="horarios-header-left">
-            <q-btn v-if="horarioStep === 2" flat round dense icon="arrow_back" color="grey-7"
-                   @click="horarioStep = 1" />
-            <span class="sheet-title">
-              {{ horarioStep === 1 ? 'Horários' : horarioCarreiraLabel }}
-            </span>
-          </div>
-          <q-btn flat round dense icon="close" @click="horariosDialog = false" />
-        </q-card-section>
-
-        <!-- passo 1: selecionar carreira -->
-        <q-card-section v-if="horarioStep === 1" class="sheet-body">
-          <p class="sheet-desc">Escolhe uma carreira para ver os horários de hoje:</p>
-          <q-input v-model="horarioSearch" outlined dense placeholder="Pesquisar carreira..."
-                   class="q-mb-sm" clearable>
-            <template #prepend><q-icon name="search" color="grey-5" /></template>
-          </q-input>
-          <div v-if="carreirasLoading" class="text-center q-py-md">
-            <q-spinner color="blue-6" size="28px" />
-          </div>
-          <q-list v-else separator class="select-list">
-            <q-item v-for="c in carreirasFiltradas" :key="c.id" clickable
-                    @click="selectCarreiraHorario(c.id, c.num + ' — ' + c.nome)">
-              <q-item-section avatar>
-                <q-icon name="directions_bus" color="grey-5" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon name="chevron_right" color="grey-4" />
-              </q-item-section>
-            </q-item>
-            <q-item v-if="carreirasFiltradas.length === 0">
-              <q-item-section class="text-grey-5 text-caption text-center">Nenhuma carreira encontrada...</q-item-section>
-            </q-item>
-          </q-list>
-        </q-card-section>
-
-        <!-- passo 2: horários por paragem -->
-        <q-card-section v-else class="sheet-body">
-          <q-input v-model="horarioParagemSearch" outlined dense placeholder="Pesquisar paragem..."
-                   class="q-mb-md" clearable>
-            <template #prepend><q-icon name="search" color="grey-5" /></template>
-          </q-input>
-          <div v-if="horariosLoading" class="text-center q-py-lg">
-            <q-spinner color="blue-6" size="32px" />
-          </div>
-          <div v-else-if="horariosByParagemFiltradas.length === 0" class="empty-state">
-            <p>Sem horários para hoje...</p>
-          </div>
-          <div v-else class="horarios-list">
-            <div v-for="entry in horariosByParagemFiltradas" :key="entry.paragemID" class="horario-row">
-              <div class="horario-paragem">{{ entry.paragemNome }}</div>
-              <div class="horario-times">
-                <span v-for="t in entry.times" :key="t"
-                      :class="['horario-chip', t < nowTime ? 'horario-chip--past' : '']">
-                  {{ t }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </q-card-section>
-
-      </q-card>
-    </q-dialog>
-
     <!-- resultados -->
     <ResultDialog v-model="resultDialog"
       :icon="resultIrregular ? 'warning' : 'check_circle'"
@@ -246,13 +159,12 @@ import QrScanner from 'components/QRScanner.vue';
 import ZoneBadge from 'components/ZoneBadge.vue';
 import ResultDialog from 'components/ResultDialog.vue';
 import CheckInSheet from 'components/CheckInSheet.vue';
-import type { TituloDTO, ViagemDTO, ParagemDTO, CarreiraDTO, HorarioDTO } from 'components/models';
+import type { TituloDTO, ViagemDTO, ParagemDTO } from 'components/models';
 import { formatDate, formatDateTime } from 'src/utils/formatters';
 import { tripIconFromNome } from 'src/utils/titulo';
 import { titlesService } from 'src/services/titlesService';
 import { tripsService } from 'src/services/tripsService';
 import { stopsService } from 'src/services/stopsService';
-import { routesService } from 'src/services/routesService';
 import { notificacoesService } from 'src/services/notificacoesService';
 import { useNotificacoesStore } from 'stores/notificacoes';
 
@@ -284,48 +196,6 @@ const checkoutError   = ref('');
 const resultDialog    = ref(false);
 const resultIrregular = ref(false);
 
-// horários
-const horariosDialog        = ref(false);
-const horarioStep           = ref<1 | 2>(1);
-const carreiras             = ref<CarreiraDTO[]>([]);
-const carreirasLoading      = ref(false);
-const horarioSearch         = ref('');
-const horarioCarreiraID     = ref<number | null>(null);
-const horarioCarreiraLabel  = ref('');
-const horarioParagemSearch  = ref('');
-const horariosLoading       = ref(false);
-const horarios              = ref<HorarioDTO[]>([]);
-
-const nowTime = computed(() => {
-  const d = new Date();
-  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-});
-
-const carreirasFiltradas = computed(() => {
-  const q = horarioSearch.value.trim().toLowerCase();
-  if (!q) return carreiras.value;
-  return carreiras.value.filter((c) => c.num.toLowerCase().includes(q) || c.nome.toLowerCase().includes(q));
-});
-
-const horariosByParagem = computed(() => {
-  const map = new Map<number, { paragemNome: string; times: string[] }>();
-  for (const h of horarios.value) {
-    const t = h.horaChegada.slice(0, 5); // "HH:mm"
-    if (!map.has(h.paragemId)) map.set(h.paragemId, { paragemNome: h.paragemNome, times: [] });
-    map.get(h.paragemId)!.times.push(t);
-  }
-  return Array.from(map.entries()).map(([paragemID, v]) => ({
-    paragemID,
-    paragemNome: v.paragemNome,
-    times: v.times.sort(),
-  }));
-});
-
-const horariosByParagemFiltradas = computed(() => {
-  const q = horarioParagemSearch.value.trim().toLowerCase();
-  if (!q) return horariosByParagem.value;
-  return horariosByParagem.value.filter((e) => e.paragemNome.toLowerCase().includes(q));
-});
 
 async function loadTitulos() {
   try   { titulos.value = await titlesService.getActive(); }
@@ -386,69 +256,95 @@ function resetCheckout() {
   checkoutError.value   = '';
 }
 
-async function openHorarios() {
-  horariosDialog.value = true;
-  carreirasLoading.value = true;
-  try { carreiras.value = await routesService.getAll(); }
-  finally { carreirasLoading.value = false; }
-}
-
-async function selectCarreiraHorario(id: number, label: string) {
-  horarioCarreiraID.value    = id;
-  horarioCarreiraLabel.value = label;
-  horarioParagemSearch.value = '';
-  horarioStep.value          = 2;
-  horariosLoading.value      = true;
-  const jsDay = new Date().getDay();
-  const day   = jsDay === 0 ? 7 : jsDay;
-  try { horarios.value = await routesService.getSchedules(id, day); }
-  finally { horariosLoading.value = false; }
-}
-
-function resetHorarios() {
-  horarioStep.value          = 1;
-  horarioCarreiraID.value    = null;
-  horarioCarreiraLabel.value = '';
-  horarioSearch.value        = '';
-  horarioParagemSearch.value = '';
-  horarios.value             = [];
-}
 </script>
 
 <style scoped>
-.home-page { background: var(--et-bg); min-height: 100dvh; }
+.home-page { background: #F6F6F6; min-height: 100dvh; }
 
 .home-header {
-  background: var(--et-blue); padding: 52px 24px 28px;
-  display: flex; justify-content: space-between; align-items: flex-start;
-  border-radius: 0 0 20px 20px;
+  background: #719BF5;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 0 0 5px 5px;
+  padding: 52px 32px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-.home-greeting-line  { display: flex; align-items: baseline; }
-.home-greeting-label { color: rgba(255,255,255,0.8); font-size: 22px; }
-.home-greeting-name  { color: white; font-size: 30px; font-weight: 800; }
+.home-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.home-greeting {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 48px;
+  color: #FFFFFF;
+  text-shadow: 0px 2px 20px rgba(0, 0, 0, 0.25);
+}
 
-.home-content { padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; }
-
-.pass-card { background: var(--et-navy); border-radius: 16px; padding: 16px 20px; color: white; }
+.pass-card {
+  background: rgba(54, 76, 123, 0.56);
+  border-radius: 20px;
+  padding: 16px 20px;
+  color: white;
+}
 .pass-card-loading { min-height: 100px; }
-.pass-card-top { display: flex; justify-content: space-between; margin-bottom: 12px; }
-.pass-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6); letter-spacing: 0.5px; }
-.pass-validade { text-align: right; }
-.pass-validade-label { display: block; font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 0.5px; }
-.pass-validade-date  { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9); }
-.pass-type      { font-size: 20px; font-weight: 700; margin: 0; }
+.pass-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.pass-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.6);
+}
+.pass-type {
+  font-family: 'Roboto', sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-shadow: 0px 2px 20px rgba(0, 0, 0, 0.25);
+  margin: 4px 0 0;
+}
 .pass-zones-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pass-validade { text-align: right; align-self: flex-start; }
+.pass-validade-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.5px;
+}
+.pass-validade-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
 
 .no-pass-card {
-  background: white; border-radius: 16px; padding: 24px; text-align: center;
-  color: #9ca3af; font-size: 14px; border: 1px dashed #e5e7eb;
+  background: rgba(54, 76, 123, 0.3); border-radius: 20px; padding: 24px; text-align: center;
+  color: rgba(255,255,255,0.7); font-size: 14px;
 }
 .no-pass-card p { margin: 8px 0 0; }
 
 .ver-bilhetes-btn {
-  background: #1f2937 !important; color: white !important;
-  border-radius: 10px !important; height: 48px;
-  font-size: 13px !important; font-weight: 700 !important; letter-spacing: 0.5px;
+  background: #364C7B !important;
+  color: white !important;
+  border-radius: 20px !important;
+  height: 57px;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+}
+
+.home-content {
+  padding: 0 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: -28px; /* metade da altura do botão → sobrepõe a borda */
 }
 
 .viagem-ativa-card { background: #16a34a; border-radius: 16px; padding: 16px; color: white; }
@@ -464,24 +360,58 @@ function resetHorarios() {
   border-radius: 10px !important; height: 44px; font-weight: 700 !important; font-size: 13px !important;
 }
 
-.action-item { background: white; border-radius: 12px; padding: 12px 16px; }
+/* ── check-in ── */
+.action-item { background: white; border-radius: 8px; padding: 12px 16px; }
 .action-icon-wrap {
-  width: 44px; height: 44px; border-radius: 10px;
+  width: 40px; height: 40px;
+  background: rgba(113, 155, 245, 0.13);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
 }
-.action-title   { font-weight: 600; font-size: 15px; color: var(--et-text); }
-.action-caption { font-size: 12px; color: var(--et-subtext); white-space: normal; }
+.action-title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: #3C3A3A;
+}
+.action-caption {
+  font-family: 'Jaldi', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(60, 58, 58, 0.82);
+  white-space: normal;
+}
 
+/* ── viagens recentes ── */
 .section-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 4px 0; }
-.section-title  { font-weight: 700; font-size: 16px; color: var(--et-text); }
+.section-title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: #3C3A3A;
+}
 
-.trip-item { background: white; border-radius: 12px; padding: 12px 16px; }
+.trip-item { background: white; border-radius: 8px; padding: 12px 16px; }
 .trip-icon-wrap {
-  width: 40px; height: 40px; background: #f3f4f6; border-radius: 10px;
+  width: 40px; height: 40px;
+  background: rgba(113, 155, 245, 0.13);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
 }
-.trip-name { font-weight: 600; font-size: 14px; color: var(--et-text); }
-.no-trips { text-align: center; padding: 24px; color: var(--et-subtext); font-size: 14px; background: white; border-radius: 12px; }
+.trip-name {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #3C3A3A;
+}
+.trip-name + :deep(.q-item__label--caption) {
+  font-family: 'Jaldi', sans-serif;
+  font-size: 13px;
+  color: rgba(60, 58, 58, 0.82);
+}
+.no-trips { text-align: center; padding: 24px; color: var(--et-subtext); font-size: 14px; background: white; border-radius: 8px; }
 
 .info-confirm {
   display: flex; align-items: center; gap: 10px;
@@ -489,7 +419,7 @@ function resetHorarios() {
   font-size: 15px; font-weight: 600; color: var(--et-text);
 }
 
-/* grid de ações */
+/* ── grid de ações ── */
 .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .quick-btn {
   background: white; border-radius: 14px; border: none; cursor: pointer;
@@ -505,12 +435,11 @@ function resetHorarios() {
   display: flex; align-items: center; justify-content: center;
 }
 
-/* horários (sheet) */
+/* ── horários (sheet) ── */
 .horarios-sheet { max-height: 88dvh; display: flex; flex-direction: column; }
 .horarios-header-left { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
 .horarios-header-left .sheet-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .select-list    { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--et-border); }
-.item-selected  { background: #eff6ff !important; }
 
 .horarios-list { display: flex; flex-direction: column; gap: 8px; }
 .horario-row   { background: white; border-radius: 10px; padding: 12px 14px; }
@@ -521,4 +450,11 @@ function resetHorarios() {
   border-radius: 20px; background: #eff6ff; color: var(--et-blue);
 }
 .horario-chip--past { background: #f3f4f6; color: #9ca3af; }
+
+.ver-history-btn {
+  font-family: 'Jaldi', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: #364C7B !important;
+}
 </style>

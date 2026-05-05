@@ -11,11 +11,11 @@
 
       <q-form class="auth-form" @submit.prevent="handleRegister">
         <div class="field-group">
-          <label class="field-label">NOME</label>
+          <label class="field-label">NOME COMPLETO</label>
           <q-input
             v-model="nome"
             outlined
-            placeholder="o teu nome"
+            placeholder="o teu nome completo"
             :rules="[(v) => !!v || 'Campo obrigatório!']"
             class="et-input"
             no-error-icon
@@ -40,7 +40,7 @@
           <q-input
             v-model="password"
             outlined
-            placeholder="mínimo 6 caracteres"
+            placeholder="a tua palavra-passe"
             :type="showPwd ? 'text' : 'password'"
             :rules="[(v) => !!v || 'Campo obrigatório!', (v) => v.length >= 6 || 'mínimo 6 caracteres']"
             class="et-input"
@@ -137,25 +137,33 @@ async function handleRegister() {
 .back-btn {
   margin-left: -8px;
   margin-bottom: 8px;
+  color: var(--et-blue) !important;
 }
 
 .auth-header {
   margin-bottom: 32px;
+  text-align: center;
 }
 
 .auth-title {
-  font-size: 28px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 35px;
   font-weight: 800;
-  color: var(--et-blue);
+  color: #719BF5;
   margin: 0 0 6px;
-  font-style: italic;
+  text-align: center;
+  line-height: 44px;
 }
 
 .auth-subtitle {
-  font-size: 15px;
-  color: var(--et-subtext);
+  font-family: 'Jaldi', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #5D5D5D;
+  opacity: 0.8;
   margin: 0;
   text-align: center;
+  line-height: 34px;
 }
 
 .auth-form {
@@ -172,14 +180,16 @@ async function handleRegister() {
 }
 
 .field-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--et-subtext);
+  font-family: 'Jaldi', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #719BF5;
+  opacity: 0.8;
   letter-spacing: 0.5px;
 }
 
 .auth-submit-btn {
-  height: 50px;
+  height: 55px;
   margin-top: 12px;
 }
 
@@ -191,21 +201,38 @@ async function handleRegister() {
   gap: 16px;
 }
 
+
 .social-buttons {
   display: flex;
   gap: 12px;
 }
 
 .google-btn {
-  border: 1px solid #e5e7eb !important;
-  width: 48px;
-  height: 48px;
+  border: 1px solid #7E7E7E !important;
+  width: 60px !important;
+  height: 40px !important;
+  border-radius: 100px !important;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25) !important;
 }
 
 .switch-link {
   text-align: center;
   margin-top: 20px;
+  font-family: 'Jaldi', sans-serif;
   font-size: 14px;
   color: var(--et-subtext);
+}
+
+.et-divider-text {
+  font-family: 'Jaldi', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #719BF5;
+  width: 100%;
+}
+
+.et-divider-text::before,
+.et-divider-text::after {
+  background: #719BF5;
 }
 </style>

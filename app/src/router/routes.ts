@@ -30,12 +30,28 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/PaymentsPage.vue'),
       },
       {
+        path: 'bilhetes/meus',
+        component: () => import('pages/MeusBilhetesPage.vue'),
+      },
+      {
+        path: 'bilhetes/comprar/:tipo',
+        component: () => import('pages/CompraTituloPage.vue'),
+      },
+      {
+        path: 'bilhetes/checkout',
+        component: () => import('pages/CheckoutPage.vue'),
+      },
+      {
         path: 'percursos',
         component: () => import('pages/PercursosPage.vue'),
       },
       {
         path: 'perfil',
         component: () => import('pages/PerfilPage.vue'),
+      },
+      {
+        path: 'perfil/editar',
+        component: () => import('pages/EditarPerfilPage.vue'),
       },
       {
         path: 'notificacoes',
