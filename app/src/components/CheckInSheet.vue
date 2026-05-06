@@ -41,7 +41,7 @@
               <q-icon name="directions_bus" :color="selectedCarreiraID === c.id ? 'blue-7' : 'grey-5'" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>{{ c.num }} — {{ c.nome }}</q-item-label>
+              <q-item-label>{{ c.nome }}</q-item-label>
               <div class="carreira-pills">
                 <span v-if="c.proximaChegada" class="pill pill-time">
                   <q-icon name="schedule" size="11px" />
@@ -72,7 +72,7 @@
               <q-icon :name="tipoIcon(t.tipo)" :color="selectedTituloID === t.id ? 'blue-7' : 'grey-5'" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>{{ t.tipo?.replace(/_/g, ' ') }}</q-item-label>
+              <q-item-label>{{ t.tipo?.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) }}</q-item-label>
               <div class="titulo-zonas-row">
                 <ZoneBadge v-for="zona in t.zonas" :key="zona" :zona="zona" />
               </div>
@@ -93,7 +93,7 @@
         <q-icon name="check_circle" size="56px" color="green-6" />
         <p class="text-h6 q-mt-md q-mb-xs">Check-in realizado com sucesso!</p>
         <p class="text-grey-6 text-caption">
-          {{ viagem?.carreiraNum }} — {{ viagem?.carreiraNome }}<br />
+          {{ viagem?.carreiraNome }}<br />
           desde <strong>{{ paragem?.nome }}</strong>
         </p>
       </q-card-section>

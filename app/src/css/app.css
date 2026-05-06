@@ -5,7 +5,7 @@
   --et-blue: #719BF5;
   --et-blue-dark: #3d6fd9;
   --et-dark: #2D2D3A;
-  --et-navy: #1E3A6E;
+  --et-navy: #364C7B;
   --et-text: #1a1a2e;
   --et-subtext: #6b7280;
   --et-border: #e5e7eb;
@@ -55,10 +55,10 @@ body {
 .et-btn-primary {
   background: var(--et-blue) !important;
   color: white !important;
-  border-radius: 5px !important;
+  border-radius: 12px !important;
   font-family: 'Roboto', sans-serif !important;
   font-weight: 700 !important;
-  font-size: 20px !important;
+  font-size: 15px !important;
   box-shadow: none !important;
 }
 
@@ -66,7 +66,7 @@ body {
   background: transparent !important;
   color: white !important;
   border: 2px solid white !important;
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   font-weight: 600 !important;
   font-size: 15px !important;
 }
@@ -173,13 +173,12 @@ body {
 
 /* ── shared empty state ── */
 .empty-state {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
   text-align: center;
-  color: #9ca3af;
+  padding: 48px 16px;
+  color: var(--et-subtext);
   font-size: 14px;
-  border: 1px dashed var(--et-border);
+  border: 2px dashed var(--et-border);
+  border-radius: 12px;
 }
 .empty-state p { margin: 8px 0 0; }
 

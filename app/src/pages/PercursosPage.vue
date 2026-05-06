@@ -1,8 +1,6 @@
 <template>
   <q-page class="percursos-page">
-    <div class="percursos-header">
-      <h1 class="page-title">Percursos e Horários</h1>
-    </div>
+    <PageHeader title="Percursos e Horários" />
 
     <div class="percursos-content">
 
@@ -28,7 +26,7 @@
           :key="c.id"
           class="linha-card"
         >
-          <span class="linha-nome">{{ c.num }} — {{ c.nome }}</span>
+          <span class="linha-nome">{{ c.nome }}</span>
           <q-btn flat round dense icon="schedule" color="blue-7" @click="verDetalhe(c)" />
         </div>
         <div v-if="carreirasFiltradas.length === 0" class="empty-state">
@@ -93,6 +91,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import PageHeader from 'components/PageHeader.vue';
 import type { CarreiraDTO, HorarioDTO } from 'components/models';
 import { routesService } from 'src/services/routesService';
 
@@ -170,7 +169,7 @@ async function loadSchedules() {
 }
 
 async function verDetalhe(c: CarreiraDTO) {
-  carreiraLabel.value    = `${c.num} — ${c.nome}`;
+  carreiraLabel.value    = c.nome;
   selectedCarreira.value = c;
   horarioDialog.value    = true;
   const jsDay = new Date().getDay();
@@ -193,61 +192,50 @@ function resetHorario() {
 <style scoped>
 .percursos-page { background: #F6F6F6; min-height: 100dvh; }
 
-.percursos-header {
-  background: #719BF5;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  padding: 52px 20px 20px;
-  border-radius: 0 0 20px 20px;
-}
-.page-title {
-  color: white;
-  font-size: 22px;
-  font-weight: 800;
-  margin: 0;
-}
 
 .percursos-content {
-  padding: 24px 32px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .section-title {
   font-family: 'Roboto', sans-serif;
   font-weight: 700;
   font-size: 18px;
-  color: #3C3A3A;
+  color: var(--et-text);
   margin: 0;
   text-shadow: 0px 2px 20px rgba(0, 0, 0, 0.25);
 }
 
 /* ── campo de pesquisa ── */
 .search-input :deep(.q-field__control) {
-  border-radius: 20px;
-  border-color: #719BF5;
+  border-radius: 12px;
   background: white;
 }
 .search-input :deep(.q-field__control:before) {
   border: 1px solid #719BF5 !important;
-  border-radius: 20px;
+  border-radius: 12px;
 }
 
 /* ── cards de linha ── */
 .linha-card {
-  background: #FFFFFF;
-  border-radius: 20px;
-  padding: 0 20px;
-  height: 73px;
+  background: white;
+  border-radius: 14px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border: 1px solid var(--et-border);
+  cursor: pointer;
+  transition: background 0.15s;
 }
+.linha-card:active { background: #f9fafb; }
 .linha-nome {
-  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
   font-weight: 700;
-  font-size: 18px;
-  color: #3C3A3A;
+  color: var(--et-text);
 }
 
 /* ── sheet de horários ── */
@@ -258,19 +246,6 @@ function resetHorario() {
   border-radius: 20px 20px 0 0;
 }
 
-.sheet-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 8px;
-}
-
-.sheet-title {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  color: #3C3A3A;
-}
 
 /* ── day selector ── */
 .day-selector-section {
@@ -331,7 +306,7 @@ function resetHorario() {
   font-family: 'Roboto', sans-serif;
   font-weight: 700;
   font-size: 13px;
-  color: #3C3A3A;
+  color: var(--et-text);
   text-align: right;
   line-height: 1;
 }
@@ -363,9 +338,8 @@ function resetHorario() {
   font-family: 'Jaldi', sans-serif;
   font-size: 11px;
   font-weight: 400;
-  color: #3C3A3A;
+  color: var(--et-text);
   line-height: 1;
 }
 
-.empty-state { text-align: center; padding: 24px; color: #9ca3af; font-size: 14px; }
 </style>

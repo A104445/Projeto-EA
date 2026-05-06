@@ -29,7 +29,7 @@
       <div v-else-if="titulosLoading" class="pass-card pass-card-loading">
         <q-skeleton type="rect" height="80px" dark />
       </div>
-      <div v-else class="no-pass-card">
+      <div v-else class="empty-state">
         <q-icon name="credit_card_off" size="32px" color="grey-5" />
         <p>Sem passe ativo.</p>
       </div>
@@ -49,7 +49,7 @@
           <q-spinner size="16px" color="white" />
         </div>
         <div class="viagem-ativa-body">
-          <p class="viagem-ativa-carreira">{{ viagemAtiva.carreiraNum }} — {{ viagemAtiva.carreiraNome }}</p>
+          <p class="viagem-ativa-carreira">{{ viagemAtiva.carreiraNome }}</p>
           <p class="viagem-ativa-origem">desde {{ viagemAtiva.origemNome }}</p>
         </div>
         <q-btn unelevated class="checkout-btn full-width" label="FAZER CHECK-OUT"
@@ -74,7 +74,7 @@
       <div class="section-header">
         <span class="section-title">Viagens recentes</span>
         <q-btn flat no-caps dense label="Ver Histórico" class="ver-history-btn"
-               @click="$router.push('/app/percursos')" />
+               @click="$router.push('/app/historico')" />
       </div>
 
       <div v-if="viagensLoading">
@@ -86,22 +86,20 @@
           </q-item-section>
         </q-item>
       </div>
-      <div v-else-if="recentViagens.length === 0" class="no-trips">
-        <p>Sem viagens recentes</p>
+      <div v-else-if="recentViagens.length === 0" class="empty-state">
+        <p>Sem viagens recentes.</p>
       </div>
       <template v-else>
-        <q-item v-for="v in recentViagens" :key="v.id" clickable class="trip-item"
-                @click="$router.push('/app/percursos')">
+        <q-item v-for="v in recentViagens" :key="v.id" class="trip-item">
           <q-item-section avatar>
             <div class="trip-icon-wrap">
               <q-icon :name="tripIconFromNome(v.carreiraNome)" size="20px" color="grey-7" />
             </div>
           </q-item-section>
           <q-item-section>
-            <q-item-label class="trip-name">{{ v.carreiraNum }} - {{ v.carreiraNome }}</q-item-label>
+            <q-item-label class="trip-name">{{ v.carreiraNome }}</q-item-label>
             <q-item-label caption>{{ formatDateTime(v.dataHoraEntrada) }}</q-item-label>
           </q-item-section>
-          <q-item-section side><q-icon name="chevron_right" color="grey-4" /></q-item-section>
         </q-item>
       </template>
     </div>
@@ -328,11 +326,11 @@ function resetCheckout() {
 .no-pass-card p { margin: 8px 0 0; }
 
 .ver-bilhetes-btn {
-  background: #364C7B !important;
+  background: var(--et-navy) !important;
   color: white !important;
-  border-radius: 20px !important;
+  border-radius: 12px !important;
   height: 57px;
-  font-size: 13px !important;
+  font-size: 15px !important;
   font-weight: 700 !important;
   letter-spacing: 0.5px;
   position: relative;
@@ -347,7 +345,7 @@ function resetCheckout() {
   margin-top: -28px; /* metade da altura do botão → sobrepõe a borda */
 }
 
-.viagem-ativa-card { background: #16a34a; border-radius: 16px; padding: 16px; color: white; }
+.viagem-ativa-card { background: #16a34a; border-radius: 14px; padding: 16px; color: white; }
 .viagem-ativa-header {
   display: flex; align-items: center; gap: 8px;
   font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
@@ -361,7 +359,7 @@ function resetCheckout() {
 }
 
 /* ── check-in ── */
-.action-item { background: white; border-radius: 8px; padding: 12px 16px; }
+.action-item { background: white; border-radius: 14px; padding: 12px 16px; }
 .action-icon-wrap {
   width: 40px; height: 40px;
   background: rgba(113, 155, 245, 0.13);
@@ -373,7 +371,7 @@ function resetCheckout() {
   font-family: 'Roboto', sans-serif;
   font-weight: 800;
   font-size: 18px;
-  color: #3C3A3A;
+  color: var(--et-text);
 }
 .action-caption {
   font-family: 'Jaldi', sans-serif;
@@ -389,10 +387,10 @@ function resetCheckout() {
   font-family: 'Roboto', sans-serif;
   font-weight: 800;
   font-size: 18px;
-  color: #3C3A3A;
+  color: var(--et-text);
 }
 
-.trip-item { background: white; border-radius: 8px; padding: 12px 16px; }
+.trip-item { background: white; border-radius: 14px; padding: 12px 16px; }
 .trip-icon-wrap {
   width: 40px; height: 40px;
   background: rgba(113, 155, 245, 0.13);
@@ -404,7 +402,7 @@ function resetCheckout() {
   font-family: 'Roboto', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  color: #3C3A3A;
+  color: var(--et-text);
 }
 .trip-name + :deep(.q-item__label--caption) {
   font-family: 'Jaldi', sans-serif;

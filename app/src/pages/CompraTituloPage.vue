@@ -38,7 +38,7 @@
               :color="cart.carreiraID === c.id ? 'blue-7' : 'grey-5'"
               size="18px"
             />
-            <span class="carreira-nome">{{ c.num }} — {{ c.nome }}</span>
+            <span class="carreira-nome">{{ c.nome }}</span>
             <q-icon v-if="cart.carreiraID === c.id" name="check_circle" color="blue-7" size="18px" />
           </div>
           <div v-if="carreirasFiltradas.length === 0" class="empty-state">
@@ -216,13 +216,12 @@ function avancar() {
   padding: 12px 16px 8px;
 }
 .search-input :deep(.q-field__control) {
-  border-radius: 20px;
-  border-color: #719BF5;
+  border-radius: 12px;
   background: white;
 }
 .search-input :deep(.q-field__control:before) {
   border: 1px solid #719BF5 !important;
-  border-radius: 20px;
+  border-radius: 12px;
 }
 
 .carreira-scroll {
@@ -256,10 +255,11 @@ function avancar() {
 }
 
 .carreira-item {
-  background: white; border-radius: 12px; padding: 14px 16px;
+  background: white; border-radius: 14px; padding: 14px 16px;
   display: flex; align-items: center; gap: 12px;
-  cursor: pointer; border: 1.5px solid transparent;
+  cursor: pointer; border: 1px solid var(--et-border);
   transition: border-color 0.15s, background 0.15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
   flex-shrink: 0;
 }
 .carreira-item:active { background: #f9fafb; }
@@ -284,10 +284,4 @@ function avancar() {
 }
 .total-chip--dim { color: #9ca3af; }
 
-.bottom-bar :deep(.q-btn__content) {
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
-}
 </style>

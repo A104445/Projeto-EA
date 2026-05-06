@@ -46,7 +46,8 @@
     <div class="form-footer">
       <q-btn
         unelevated
-        class="guardar-btn full-width"
+        class="et-btn-primary full-width"
+        style="height: 52px"
         label="Guardar alterações"
         :loading="saving"
         @click="saveProfile"
@@ -101,7 +102,7 @@ async function saveProfile() {
 .form-card {
   background: white;
   margin: 20px 16px 0;
-  border-radius: 16px;
+  border-radius: 14px;
   padding: 20px 16px;
   display: flex; flex-direction: column; gap: 16px;
   border: 1px solid var(--et-border);
@@ -120,16 +121,4 @@ async function saveProfile() {
 .form-footer {
   padding: 20px 16px;
 }
-.guardar-btn {
-  background: white !important;
-  color: var(--et-text) !important;
-  border: 1.5px solid #d1d5db !important;
-  border-radius: 12px !important;
-  height: 52px;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  box-shadow: none !important;
-}
-.guardar-btn:active { background: #f9fafb !important; }
 </style>

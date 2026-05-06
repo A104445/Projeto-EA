@@ -81,6 +81,7 @@ function label(n: NotificacaoDTO) {
 .notif-card {
   background: white; border-radius: 14px; padding: 14px 16px;
   display: flex; align-items: flex-start; gap: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 }
 
 .notif-icon-wrap {

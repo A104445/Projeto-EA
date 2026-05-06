@@ -108,7 +108,7 @@ function logout() {
 
 /* ── menu ── */
 .menu-section {
-  background: white; border-radius: 16px;
+  background: white; border-radius: 14px;
   overflow: hidden; border: 1px solid var(--et-border);
 }
 .menu-item {
@@ -138,7 +138,7 @@ function logout() {
   border-radius: 12px !important;
   height: 48px;
   font-family: 'Roboto', sans-serif !important;
-  font-size: 13px !important;
+  font-size: 15px !important;
   font-weight: 700 !important;
   letter-spacing: 0.5px;
   box-shadow: none !important;

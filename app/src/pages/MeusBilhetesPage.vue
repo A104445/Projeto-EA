@@ -23,7 +23,7 @@
 
       <div v-else-if="titulosFiltrados.length === 0" class="empty-state">
         <q-icon name="credit_card_off" size="32px" color="grey-4" />
-        <p>{{ tabAtiva === 'ativos' ? 'Nenhum título disponível...' : 'Nenhum título utilizado...' }}</p>
+        <p>{{ tabAtiva === 'ativos' ? 'Nenhum título disponível.' : 'Nenhum título utilizado.' }}</p>
       </div>
 
       <template v-else>
@@ -88,10 +88,10 @@ async function loadTitulos() {
 .tabs-row { display: flex; gap: 8px; margin-bottom: 16px; }
 .tab-pill {
   padding: 7px 22px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600;
-  background: transparent; color: #364C7B; border: 2px solid #364C7B;
+  background: transparent; color: var(--et-navy); border: 2px solid var(--et-navy);
   transition: background 0.15s, color 0.15s;
 }
-.tab-pill--active { background: #364C7B; color: white; border-color: #364C7B; }
+.tab-pill--active { background: var(--et-navy); color: white; border-color: var(--et-navy); }
 
 /* cards */
 .titulo-card {
@@ -114,6 +114,4 @@ async function loadTitulos() {
 .titulo-saldo { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6b7280; }
 .titulo-id    { font-size: 11px; color: #9ca3af; }
 
-.empty-state { text-align: center; padding: 40px 0; color: var(--et-subtext); font-size: 14px; }
-.empty-state p { margin: 8px 0 0; }
 </style>

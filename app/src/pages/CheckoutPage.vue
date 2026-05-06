@@ -153,9 +153,10 @@ async function confirmar() {
 .resumo-title { font-size: 18px; font-weight: 700; color: var(--et-text); }
 
 .resumo-card {
-  background: white; border-radius: 12px; padding: 16px;
+  background: white; border-radius: 14px; padding: 16px;
   border: 1px solid var(--et-border);
   display: flex; flex-direction: column; gap: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 }
 .resumo-main { font-size: 15px; font-weight: 600; color: var(--et-text); }
 .resumo-sub  { font-size: 13px; color: var(--et-subtext); }
@@ -189,7 +190,7 @@ async function confirmar() {
 
 .payment-option {
   display: flex; align-items: center; gap: 12px;
-  background: #f9fafb; border-radius: 12px; padding: 12px 14px;
+  background: #f9fafb; border-radius: 14px; padding: 12px 14px;
   border: 1.5px solid transparent;
   cursor: pointer; transition: border-color 0.15s, background 0.15s;
 }
@@ -215,10 +216,4 @@ async function confirmar() {
   box-shadow: inset 0 0 0 3px white;
 }
 
-.bottom-bar :deep(.q-btn__content) {
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
-}
 </style>

@@ -57,10 +57,11 @@ import PageHeader from 'components/PageHeader.vue';
 .opcoes-list { display: flex; flex-direction: column; gap: 10px; }
 
 .opcao-card {
-  background: white; border-radius: 16px; padding: 16px;
+  background: white; border-radius: 14px; padding: 14px 16px;
   display: flex; align-items: center; gap: 14px;
   cursor: pointer; transition: background 0.15s;
   border: 1px solid var(--et-border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 }
 .opcao-card:active { background: #f9fafb; }
 

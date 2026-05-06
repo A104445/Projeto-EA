@@ -46,6 +46,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/PercursosPage.vue'),
       },
       {
+        path: 'historico',
+        component: () => import('pages/HistoricoPage.vue'),
+      },
+      {
         path: 'perfil',
         component: () => import('pages/PerfilPage.vue'),
       },
