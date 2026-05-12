@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "titulo_transporte")
+@Table(name = "titulo_transporte", indexes = {
+    @Index(name = "idx_titulo_utente_estado", columnList = "utente_id, estado")
+})
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_titulo", discriminatorType = DiscriminatorType.STRING)
 @Getter @NoArgsConstructor

@@ -73,7 +73,7 @@ lines.append("CROSS JOIN (VALUES (1), (2), (3)) AS z(zona_id);")
 
 out_dir = os.path.dirname(__file__)
 out_sql = os.path.join(out_dir, "users.sql")
-out_csv = os.path.join(out_dir, "load_users.csv")
+out_csv = os.path.join(out_dir, "users.csv")
 
 with open(out_sql, "w", encoding="utf-8") as f:
     f.write("\n".join(lines))

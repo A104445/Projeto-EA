@@ -8,7 +8,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "horario")
+@Table(name = "horario", indexes = {
+    @Index(name = "idx_horario_carreira_paragem_dia_hora",
+           columnList = "carreira_id, paragem_id, dia_semana, hora_chegada"),
+    @Index(name = "idx_horario_paragem_dia_hora",
+           columnList = "paragem_id, dia_semana, hora_chegada")
+})
 @Getter @NoArgsConstructor
 public class HorarioEntity {
 

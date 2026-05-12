@@ -67,8 +67,7 @@ public class ViagemService {
                 : findNextVeiculo(carreira, paragem);
         viagem.setVeiculo(veiculo);
         if (veiculo != null) {
-            veiculo.incrementarOcupacao();
-            veiculoRepository.save(veiculo);
+            veiculoRepository.incrementarOcupacao(veiculo.getId());
         }
 
         return new ViagemDTO(viagemRepository.save(viagem));
@@ -102,8 +101,7 @@ public class ViagemService {
         tituloRepository.save(titulo);
 
         if (viagem.getVeiculo() != null) {
-            viagem.getVeiculo().decrementarOcupacao();
-            veiculoRepository.save(viagem.getVeiculo());
+            veiculoRepository.decrementarOcupacao(viagem.getVeiculo().getId());
         }
 
         return new ViagemDTO(viagemRepository.save(viagem));
