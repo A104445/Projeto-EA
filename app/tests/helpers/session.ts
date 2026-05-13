@@ -16,6 +16,15 @@ export function appUrl(path = '/'): string {
 
 export async function gotoApp(page: Page, path = '/') {
   await page.goto(appUrl(path));
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+      }
+    `,
+  });
 }
 
 export async function seedAuth(page: Page, user: User = defaultUser, token = 'test-token') {
