@@ -25,7 +25,7 @@ test('redireciona utilizador autenticado para /app ao abrir login', async ({ pag
   await gotoApp(page, '/login');
 
   await expect(page).toHaveURL(/#\/app$/);
-  await expect(page.getByText('Olá,')).toBeVisible();
+  await expect(page.getByText('Olá, Joao!')).toBeVisible();
 });
 
 test('mostra a página 404 em rota desconhecida', async ({ page }) => {

@@ -3,6 +3,7 @@ import type {
   CarreiraDTO,
   HorarioDTO,
   NotificacaoDTO,
+  ParagemDTO,
   TituloDTO,
   User,
   ViagemDTO,
@@ -14,7 +15,9 @@ import {
   defaultHistoryTrips,
   defaultNotifications,
   defaultRoutes,
+  defaultRoutesByStop,
   defaultSchedulesByRoute,
+  defaultStops,
   defaultUser,
   defaultZones,
 } from './data';
@@ -32,6 +35,8 @@ export type ApiState = {
   zones: ZonaDTO[];
   routes: CarreiraDTO[];
   schedulesByRoute: Record<number, HorarioDTO[]>;
+  stops: ParagemDTO[];
+  routesByStop: Record<number, CarreiraDTO[]>;
   tripsHistory: ViagemDTO[];
   activeTrip: ViagemDTO | null;
   notifications: NotificacaoDTO[];
@@ -53,6 +58,8 @@ export function createApiState(overrides: Partial<ApiState> = {}): ApiState {
     zones: clone(overrides.zones ?? defaultZones),
     routes: clone(overrides.routes ?? defaultRoutes),
     schedulesByRoute: clone(overrides.schedulesByRoute ?? defaultSchedulesByRoute),
+    stops: clone(overrides.stops ?? defaultStops),
+    routesByStop: clone(overrides.routesByStop ?? defaultRoutesByStop),
     tripsHistory: clone(overrides.tripsHistory ?? defaultHistoryTrips),
     activeTrip: clone(overrides.activeTrip ?? null),
     notifications: clone(overrides.notifications ?? defaultNotifications),
@@ -76,6 +83,12 @@ function endpointKey(method: string, pathname: string): string {
 
 function nextTitleId(state: ApiState): number {
   return Math.max(0, ...state.titlesAll.map((title) => title.id)) + 1;
+}
+
+function nextTripId(state: ApiState): number {
+  const ids = state.tripsHistory.map((t) => t.id);
+  if (state.activeTrip) ids.push(state.activeTrip.id);
+  return Math.max(0, ...ids) + 1;
 }
 
 function zoneNamesFromIds(state: ApiState, zonaIDs: number[]): string[] {
@@ -109,6 +122,11 @@ export async function mockApi(page: Page, state: ApiState) {
         );
         return;
       }
+      await fulfillJson(route, 200, { token: state.token, user: state.user });
+      return;
+    }
+
+    if (key === 'POST /api/auth/google') {
       await fulfillJson(route, 200, { token: state.token, user: state.user });
       return;
     }
@@ -160,8 +178,8 @@ export async function mockApi(page: Page, state: ApiState) {
     }
 
     if (key === 'POST /api/tickets/single-ticket') {
-      const payload = request.postDataJSON() as { carreiraId: number };
-      const routeInfo = state.routes.find((entry) => entry.id === payload.carreiraId);
+      const payload = request.postDataJSON() as { carreiraID: number };
+      const routeInfo = state.routes.find((entry) => entry.id === payload.carreiraID);
       const title: TituloDTO = {
         id: nextTitleId(state),
         tipo: 'BILHETE_INDIVIDUAL',
@@ -207,6 +225,23 @@ export async function mockApi(page: Page, state: ApiState) {
       return;
     }
 
+    if (key === 'GET /api/stops/by-qr') {
+      const qr = url.searchParams.get('qr') ?? '';
+      const stop = state.stops.find((s) => s.qr === qr);
+      if (!stop) {
+        await fulfillJson(route, 404, { message: 'Paragem não encontrada' });
+        return;
+      }
+      await fulfillJson(route, 200, stop);
+      return;
+    }
+
+    if (method === 'GET' && pathname.match(/^\/api\/stops\/\d+\/routes$/)) {
+      const stopId = Number(pathname.split('/')[3]);
+      await fulfillJson(route, 200, state.routesByStop[stopId] ?? []);
+      return;
+    }
+
     if (key === 'GET /api/trips/history') {
       await fulfillJson(route, 200, state.tripsHistory);
       return;
@@ -214,6 +249,45 @@ export async function mockApi(page: Page, state: ApiState) {
 
     if (key === 'GET /api/trips/active') {
       await fulfillJson(route, 200, state.activeTrip);
+      return;
+    }
+
+    if (key === 'POST /api/trips/check-in') {
+      const payload = request.postDataJSON() as {
+        paragemID: number;
+        carreiraID: number;
+        tituloID: number;
+      };
+      const stop = state.stops.find((s) => s.id === payload.paragemID);
+      const carreira = state.routes.find((c) => c.id === payload.carreiraID);
+      const trip: ViagemDTO = {
+        id: nextTripId(state),
+        estado: 'EM_CURSO',
+        dataHoraEntrada: new Date().toISOString(),
+        carreiraNum: carreira?.num ?? '',
+        carreiraNome: carreira?.nome ?? '',
+        origemNome: stop?.nome ?? '',
+      };
+      state.activeTrip = trip;
+      await fulfillJson(route, 200, trip);
+      return;
+    }
+
+    if (method === 'POST' && pathname.match(/^\/api\/trips\/\d+\/check-out$/)) {
+      const viagemID = Number(pathname.split('/')[3]);
+      const payload = request.postDataJSON() as { paragemID: number };
+      const stop = state.stops.find((s) => s.id === payload.paragemID);
+      const finished: ViagemDTO = {
+        ...(state.activeTrip ?? ({} as ViagemDTO)),
+        id: viagemID,
+        estado: 'CONCLUIDA',
+        dataHoraSaida: new Date().toISOString(),
+        destinoNome: stop?.nome ?? '',
+        irregular: false,
+      };
+      state.activeTrip = null;
+      state.tripsHistory.unshift(finished);
+      await fulfillJson(route, 200, finished);
       return;
     }
 

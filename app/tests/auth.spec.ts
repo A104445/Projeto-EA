@@ -13,7 +13,7 @@ test('faz login com sucesso e entra na app', async ({ page }) => {
   await page.getByRole('button', { name: 'INICIAR SESSÃO' }).click();
 
   await expect(page).toHaveURL(/#\/app$/);
-  await expect(page.getByText('Olá,')).toBeVisible();
+  await expect(page.getByText('Olá, Joao!')).toBeVisible();
   await expect
     .poll(async () => page.evaluate(() => localStorage.getItem('et_token')))
     .toBe(state.token);
@@ -50,7 +50,7 @@ test('regista utilizador com sucesso', async ({ page }) => {
   await page.getByRole('button', { name: 'CRIAR CONTA' }).click();
 
   await expect(page).toHaveURL(/#\/app$/);
-  await expect(page.getByText('Maria!')).toBeVisible();
+  await expect(page.getByText('Olá, Maria!')).toBeVisible();
 });
 
 test('mostra erro de e-mail duplicado no registo', async ({ page }) => {
