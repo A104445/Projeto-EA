@@ -38,6 +38,7 @@ defineEmits<{ toggle: [id: number]; retry: [] }>();
   padding: 8px 18px; border-radius: 24px; border: 2px solid;
   background: transparent; font-size: 13px; font-weight: 600;
   cursor: pointer; transition: background 0.15s, color 0.15s; outline: none;
+  scroll-margin-bottom: 180px;
 }
 .zona-chip-selected { color: white !important; }
 </style>
