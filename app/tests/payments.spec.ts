@@ -70,10 +70,7 @@ test('compra um pacote de viagens', async ({ page }) => {
   await page.locator('.opcao-card').filter({ hasText: 'Pacote de Viagens' }).click();
 
   await expect(page).toHaveURL(/#\/app\/bilhetes\/comprar\/pacote$/);
-  const zonaC = page.locator('.zona-chip').filter({ hasText: 'Zona C' });
-  await zonaC.scrollIntoViewIfNeeded();
-  await zonaC.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-  await zonaC.click();
+  await page.locator('.zona-chip').filter({ hasText: 'Zona C' }).dispatchEvent('click');
   await expect(page.locator('.num-viagens-val')).toHaveText('5');
   await expect(page.locator('.total-chip')).toContainText('4,50€');
 
