@@ -52,13 +52,13 @@ jobs:
 
       - name: Build & push backend
         run: |
-          docker build -f backend/Dockerfile.production \
+          docker build -f backend/deploy.Dockerfile \
             -t ${{ steps.images.outputs.backend }} ./backend
           docker push ${{ steps.images.outputs.backend }}
 
       - name: Build & push frontend
         run: |
-          docker build -f app/Dockerfile.production \
+          docker build -f app/deploy.Dockerfile \
             --build-arg VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
             -t ${{ steps.images.outputs.app }} ./app
           docker push ${{ steps.images.outputs.app }}
@@ -119,22 +119,24 @@ jobs:
           VM_IP=$(gcloud compute instances describe "$VM_NAME" \
             --project="$GCP_PROJECT" --zone="$GCP_ZONE" \
             --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+          AIRBUS_HOSTNAME="${VM_IP}.nip.io"
 
           cat > /tmp/airbus.env <<EOF
           AIRBUS_IMAGE=${AIRBUS_IMAGE}
           AIRBUS_APP_IMAGE=${AIRBUS_APP_IMAGE}
+          AIRBUS_HOSTNAME=${AIRBUS_HOSTNAME}
           DB_USER=postgres
           DB_NAME=airbus
           DB_PASSWORD=${DB_PASSWORD}
           JWT_SECRET=${JWT_SECRET}
-          CORS_ALLOWED_ORIGINS=http://${VM_IP}
+          CORS_ALLOWED_ORIGINS=https://${AIRBUS_HOSTNAME}
           GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
           GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-          GOOGLE_REDIRECT_URI=http://${VM_IP}.nip.io
+          GOOGLE_REDIRECT_URI=https://${AIRBUS_HOSTNAME}
           EOF
 
           gcloud compute scp \
-            docker-compose.production.yml data/seed.sql data/check-seed.sh /tmp/airbus.env \
+            docker-compose.production.yml app/deploy.Caddyfile data/seed.sql data/check-seed.sh /tmp/airbus.env \
             "$VM_USER@$VM_NAME":/tmp/ \
             --project="$GCP_PROJECT" --zone="$GCP_ZONE" --tunnel-through-iap --quiet
           rm -f /tmp/airbus.env
@@ -142,12 +144,13 @@ jobs:
           gcloud compute ssh "$VM_USER@$VM_NAME" \
             --project="$GCP_PROJECT" --zone="$GCP_ZONE" --tunnel-through-iap --quiet \
             --command="set -euo pipefail
-              sudo mkdir -p /opt/airbus/data
+              sudo mkdir -p /opt/airbus/data /opt/airbus/caddy
               sudo mv /tmp/docker-compose.production.yml /opt/airbus/docker-compose.yml
+              sudo mv /tmp/deploy.Caddyfile /opt/airbus/caddy/deploy.Caddyfile
               sudo mv /tmp/seed.sql /opt/airbus/data/seed.sql
               sudo mv /tmp/check-seed.sh /opt/airbus/data/check-seed.sh
               sudo mv /tmp/airbus.env /opt/airbus/.env
-              sudo chmod 644 /opt/airbus/data/seed.sql /opt/airbus/data/check-seed.sh
+              sudo chmod 644 /opt/airbus/caddy/deploy.Caddyfile /opt/airbus/data/seed.sql /opt/airbus/data/check-seed.sh
               sudo chmod 600 /opt/airbus/.env
               echo '$GHCR_TOKEN' | sudo docker login ghcr.io -u '$GHCR_USER' --password-stdin
               cd /opt/airbus
@@ -155,10 +158,11 @@ jobs:
               sudo docker compose --env-file .env pull
               sudo docker compose --env-file .env up -d --scale backend=1 postgres backend
               sudo docker compose --env-file .env up --abort-on-container-exit --exit-code-from seed seed
-              sudo docker compose --env-file .env up -d --scale backend=$BACKEND_REPLICAS --remove-orphans app
+              sudo docker compose --env-file .env up -d --scale backend=$BACKEND_REPLICAS --remove-orphans app caddy
 
               sudo docker image prune -f
               sudo docker compose ps"
 
-          echo "Add the following origin to your Google Cloud OAuth js origins and redirect urls: http://$VM_IP.nip.io"
-          echo "AirBus reachable at: http://$VM_IP.nip.io"
+          echo "Add the following JS origin in Google Cloud OAuth: https://$AIRBUS_HOSTNAME"
+          echo "Add the following redirect URI in Google Cloud OAuth: https://$AIRBUS_HOSTNAME"
+          echo "AirBus reachable at: https://$AIRBUS_HOSTNAME"

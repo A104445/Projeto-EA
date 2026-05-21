@@ -1,6 +1,7 @@
 import { defineConfig } from '#q-app/wrappers';
 import { fileURLToPath } from 'node:url';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type VitePluginEntry = [string, any, { server?: boolean; client?: boolean }?];
 
 export default defineConfig((ctx) => {

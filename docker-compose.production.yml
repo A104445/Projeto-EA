@@ -64,13 +64,29 @@ services:
   app:
     image: ${AIRBUS_APP_IMAGE}
     restart: unless-stopped
-    ports:
-      - "80:80"
     depends_on:
       backend:
         condition: service_healthy
       seed:
         condition: service_completed_successfully
 
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      AIRBUS_HOSTNAME: ${AIRBUS_HOSTNAME}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/deploy.Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_started
+
 volumes:
   postgres-data:
+  caddy-data:
+  caddy-config:

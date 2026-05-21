@@ -2,6 +2,31 @@
 
 App para utentes/utilizadores de meios de transporte localizada (uma cidade)
 
+## HTTPS em produção com Caddy
+
+Em telemóveis, `getUserMedia` e bibliotecas de QR normalmente só funcionam em contexto seguro (`https://`). Por isso o caminho certo aqui é terminar TLS em produção com Caddy, à frente do frontend, em vez de expor a app diretamente por `http`.
+
+### Como funciona
+
+- O deploy publica a app em `https://<vm-ip>.nip.io`.
+- O Caddy recebe tráfego nas portas `80` e `443` e obtém o certificado TLS automaticamente.
+- O Caddy faz proxy para o container `app`.
+- O `app` continua a fazer proxy de `/api` para `backend:8080`, portanto o browser fica sempre no mesmo origin HTTPS.
+
+### O que o deploy precisa
+
+- DNS dinâmico via `nip.io`, usando o IP público da VM.
+- Portas `80` e `443` abertas até à VM para o ACME challenge e tráfego HTTPS.
+- Origem OAuth do Google configurada com o host HTTPS público.
+
+### Limitação importante
+
+Isto resolve o secure context para a câmara no browser do telemóvel. Se o Google OAuth falhar, o problema já não é HTTPS da app; normalmente passa a ser configuração de Authorized JavaScript Origins e redirect URIs no Google Cloud.
+
+### Diagrama
+
+Existe um diagrama Mermaid da topologia em [docs/caddy-phone-flow.mmd](docs/caddy-phone-flow.mmd).
+
 # Getting Started
 
 ### Reference Documentation
