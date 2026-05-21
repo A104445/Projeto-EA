@@ -33,3 +33,4 @@ gcp-sa*.json
 
 .codex
 context/
+**/__pycache__
